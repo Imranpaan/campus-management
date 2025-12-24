@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>University Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to Campus Event Scheduling and Space Management System </h1>
+        <p>Please select your role to login:</p>
+        <div class="role-selection">
+            <a href="/lecturer/login" class="card">
+                <h3>Lecturer</h3>
+            </a>
+            <a href="/student/login" class="card">
+                <h3>Student</h3>
+            </a>
+            <a href="/admin/login" class="card admin">
+                <h3>Admin</h3>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        /*nav*/
+        .navbar {
+            background-color: #333;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+        .content {
+            padding: 40px;
+            text-align: center;
+        }
+        .welcome-box {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <div class="logo">System Dashboard</div>
+    <a href="{{ url_for('index') }}" class="logout-btn">Logout</a>
+</div>
+
+<div class="content">
+    <div class="welcome-box">
+        <h1>Welcome to the System</h1>
+        <p>You have successfully logged in. Use the button above to sign out.</p>
+    </div>
+</div>
+
+</body>
+</html>

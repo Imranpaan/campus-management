@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lecturer Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            width: 350px;
+            background: white;
+            padding: 25px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        label {
+            margin-top: 10px;
+            display: block;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+        button {
+            margin-top: 15px;
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .alert {
+            margin-bottom: 10px;
+            padding: 8px;
+            color: white;
+        }
+        .alert-danger { background: #dc3545; }
+        .alert-success { background:#09fa41; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Lecturer Login</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <label>Lecturer User ID</label>
+        {{ form.user_id() }}
+
+        <label>Password</label>
+        {{ form.password() }}
+
+        {{ form.submit() }}
+    </form>
+
+    <div style="margin-top: 20px; text-align: center; border-top: 1px solid #eee; padding-top: 15px;">
+        <p>Not a lecturer?</p>
+        <a href="{{ url_for('index') }}" style="text-decoration: none; color: #007bff; font-weight: bold;">Back to home</a>
+    </div>
+</div>
+
+</body>
+</html>
