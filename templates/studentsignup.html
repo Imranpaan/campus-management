@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Student Login</title>
+    <title>Student Sign Up</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -19,31 +19,56 @@
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-        h1 { text-align: center; color: #333; }
-        label { margin-top: 10px; display: block; }
-        input { width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            margin-top: 10px;
+            display: block;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
         button {
             margin-top: 15px;
             width: 100%;
             padding: 10px;
-            background: #28a745;
-            color: rgb(0, 0, 0);
-            border: 1px solid #000;
+            background: #007bff; /* Blue for signup */
+            color: white;
+            border: none;
             cursor: pointer;
         }
-        .alert { padding: 8px; color: white; margin-bottom: 10px; border-radius: 4px; }
-        .alert-danger { background: #dc3545; }
-        .alert-success { background: #28a745; }
-        .signup-btn {
-            margin-top: 10px;
-            background: #e0e0e0; 
+        .alert {
+            padding: 8px;
+            color: white;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .alert-danger {
+            background: #dc3545;
+        }
+        .alert-success {
+            background: #28a745;
+        }
+        .login-link {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .login-link a {
+            text-decoration: none;
+            color: #28a745;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Student Login</h1>
+    <h1>Student Sign Up</h1>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -62,19 +87,13 @@
         <label>Password</label>
         {{ form.password() }}
 
+        <!-- Sign Up button placed right under password -->
         {{ form.submit() }}
     </form>
 
-    <form action="{{ url_for('student_signup') }}" method="GET">
-        <button type="submit" class="signup-btn">Sign Up</button>
-    </form>
-
-    <div style="margin-top: 20px; text-align: center; border-top: 1px solid #eee; padding-top: 15px;">
-        <p>Not a student?</p>
-        <a href="{{ url_for('index') }}"
-           style="text-decoration: none; color: #007bff; font-weight: bold;">
-            Back To Home
-        </a>
+    <div class="login-link">
+        <p>Already have an account?</p>
+        <a href="{{ url_for('student_login') }}">Login here</a>
     </div>
 </div>
 
