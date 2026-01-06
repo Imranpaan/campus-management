@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS lecturers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    lecturer_id TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL
+);
