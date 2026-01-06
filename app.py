@@ -11,17 +11,11 @@ app.config['SECRET_KEY'] = 'secret123'
 
 bcrypt = Bcrypt(app)
 
-# =========================
-# DATABASE PATHS
-# =========================
 STUDENT_DB = "static/student.db"
 ADMIN_DB = "static/admin.db"
 
 os.makedirs("static", exist_ok=True)
 
-# =========================
-# CREATE ADMIN DB & TABLE
-# =========================
 def init_admin_db():
     conn = sqlite3.connect(ADMIN_DB)
     cur = conn.cursor()
@@ -35,11 +29,8 @@ def init_admin_db():
     conn.commit()
     conn.close()
 
-init_admin_db()   # 🔥 THIS CREATES admin.db
+init_admin_db()
 
-# =========================
-# FORMS
-# =========================
 class LecturerLoginForm(FlaskForm):
     user_id = StringField('Lecturer User ID', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
@@ -60,9 +51,11 @@ class AdminLoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
 
-# =========================
-# STUDENT DB QUERY
-# =========================
+class AdminSignupForm(FlaskForm):
+    admin_id = StringField('Admin User ID', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('Sign Up')
+
 def query_student_db(query, args=(), one=False):
     conn = sqlite3.connect(STUDENT_DB)
     cur = conn.cursor()
@@ -72,9 +65,6 @@ def query_student_db(query, args=(), one=False):
     conn.close()
     return (rv[0] if rv else None) if one else rv
 
-# =========================
-# ROUTES
-# =========================
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -83,7 +73,6 @@ def index():
 def dashboard():
     return render_template('dashboard.html')
 
-# Lecturer login (unchanged)
 @app.route('/lecturer/login', methods=['GET', 'POST'])
 def lecturer_login():
     form = LecturerLoginForm()
@@ -94,9 +83,6 @@ def lecturer_login():
             flash('Invalid User ID or Password', 'danger')
     return render_template('lecturer_login.html', form=form)
 
-# =========================
-# STUDENT SIGNUP
-# =========================
 @app.route('/student/signup', methods=['GET', 'POST'])
 def student_signup():
     form = StudentSignupForm()
@@ -122,9 +108,6 @@ def student_signup():
 
     return render_template('studentsignup.html', form=form)
 
-# =========================
-# STUDENT LOGIN
-# =========================
 @app.route('/student/login', methods=['GET', 'POST'])
 def student_login():
     form = StudentLoginForm()
@@ -145,9 +128,37 @@ def student_login():
 
     return render_template('student_login.html', form=form)
 
-# =========================
-# ADMIN LOGIN (USING admin.db)
-# =========================
+@app.route('/admin/signup', methods=['GET', 'POST'])
+def admin_signup():
+    form = AdminSignupForm()
+    if form.validate_on_submit():
+        admin_id = form.admin_id.data
+        password = form.password.data
+
+        if len(password) < 8:
+            flash("Password must be at least 8 characters.", "danger")
+            return render_template('admin_signup.html', form=form)
+
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+
+        try:
+            conn = sqlite3.connect(ADMIN_DB)
+            cur = conn.cursor()
+            cur.execute(
+                "INSERT INTO admins (admin_id, password) VALUES (?, ?)",
+                (admin_id, hashed_password)
+            )
+            conn.commit()
+            conn.close()
+
+            flash("Admin account created successfully! Please log in.", "success")
+            return redirect(url_for('admin_login'))
+
+        except sqlite3.IntegrityError:
+            flash("Admin ID already exists!", "danger")
+
+    return render_template('admin_signup.html', form=form)
+
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
     form = AdminLoginForm()
@@ -168,6 +179,6 @@ def admin_login():
 
     return render_template('admin_login.html', form=form)
 
-# =========================
 if __name__ == '__main__':
     app.run(debug=True)
+
