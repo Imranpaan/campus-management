@@ -6,65 +6,93 @@ from flask_bcrypt import Bcrypt
 import sqlite3
 import os
 
+# ---------------- APP SETUP ----------------
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret123'
 
 bcrypt = Bcrypt(app)
 
+# ---------------- DATABASE PATHS ----------------
 STUDENT_DB = "static/student.db"
 ADMIN_DB = "static/admin.db"
+LECTURER_DB = "static/lecturer.db"
 
 os.makedirs("static", exist_ok=True)
 
-def init_admin_db():
-    conn = sqlite3.connect(ADMIN_DB)
+# ---------------- DATABASE INITIALIZATION ----------------
+def init_db(db_path, table_sql):
+    conn = sqlite3.connect(db_path)
     cur = conn.cursor()
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS admins (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        admin_id TEXT NOT NULL UNIQUE,
-        password TEXT NOT NULL
-    )
-    """)
+    cur.execute(table_sql)
     conn.commit()
     conn.close()
 
-init_admin_db()
+init_db(STUDENT_DB, """
+CREATE TABLE IF NOT EXISTS students (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL
+)
+""")
 
-class LecturerLoginForm(FlaskForm):
-    user_id = StringField('Lecturer User ID', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    submit = SubmitField('Login')
+init_db(ADMIN_DB, """
+CREATE TABLE IF NOT EXISTS admins (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    admin_id TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL
+)
+""")
 
+init_db(LECTURER_DB, """
+CREATE TABLE IF NOT EXISTS lecturers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    lecturer_id TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL
+)
+""")
+
+# ---------------- FORMS ----------------
 class StudentSignupForm(FlaskForm):
-    student_id = StringField('Student User ID', validators=[DataRequired()])
+    student_id = StringField('Student ID', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Sign Up')
 
 class StudentLoginForm(FlaskForm):
-    student_id = StringField('Student User ID', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    submit = SubmitField('Login')
-
-class AdminLoginForm(FlaskForm):
-    admin_id = StringField('Admin User ID', validators=[DataRequired()])
+    student_id = StringField('Student ID', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
 
 class AdminSignupForm(FlaskForm):
-    admin_id = StringField('Admin User ID', validators=[DataRequired()])
+    admin_id = StringField('Admin ID', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Sign Up')
 
-def query_student_db(query, args=(), one=False):
-    conn = sqlite3.connect(STUDENT_DB)
+class AdminLoginForm(FlaskForm):
+    admin_id = StringField('Admin ID', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('Login')
+
+class LecturerSignupForm(FlaskForm):
+    lecturer_id = StringField('Lecturer ID', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('Sign Up')
+
+class LecturerLoginForm(FlaskForm):
+    user_id = StringField('Lecturer ID', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('Login')
+
+# ---------------- DATABASE HELPER ----------------
+def query_db(db, query, args=(), one=False):
+    conn = sqlite3.connect(db)
     cur = conn.cursor()
     cur.execute(query, args)
     conn.commit()
-    rv = cur.fetchall()
+    result = cur.fetchall()
     conn.close()
-    return (rv[0] if rv else None) if one else rv
+    return result[0] if one and result else result
 
+# ---------------- ROUTES ----------------
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -73,38 +101,26 @@ def index():
 def dashboard():
     return render_template('dashboard.html')
 
-@app.route('/lecturer/login', methods=['GET', 'POST'])
-def lecturer_login():
-    form = LecturerLoginForm()
-    if form.validate_on_submit():
-        if form.user_id.data == 'lecturer1' and form.password.data == '1234':
-            return redirect(url_for('dashboard'))
-        else:
-            flash('Invalid User ID or Password', 'danger')
-    return render_template('lecturer_login.html', form=form)
-
+# ---------------- STUDENT ----------------
 @app.route('/student/signup', methods=['GET', 'POST'])
 def student_signup():
     form = StudentSignupForm()
     if form.validate_on_submit():
-        student_id = form.student_id.data
-        password = form.password.data
-
-        if len(password) < 8:
-            flash("Password must be at least 8 characters.", "danger")
+        if len(form.password.data) < 8:
+            flash("Password must be at least 8 characters", "danger")
             return render_template('studentsignup.html', form=form)
 
-        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-
         try:
-            query_student_db(
+            query_db(
+                STUDENT_DB,
                 "INSERT INTO students (student_id, password) VALUES (?, ?)",
-                (student_id, hashed_password)
+                (form.student_id.data,
+                 bcrypt.generate_password_hash(form.password.data).decode())
             )
-            flash("Account created successfully! Please log in.", "success")
+            flash("Student account created successfully!", "success")
             return redirect(url_for('student_login'))
         except sqlite3.IntegrityError:
-            flash("Student ID already exists!", "danger")
+            flash("Student ID already exists", "danger")
 
     return render_template('studentsignup.html', form=form)
 
@@ -112,50 +128,38 @@ def student_signup():
 def student_login():
     form = StudentLoginForm()
     if form.validate_on_submit():
-        student_id = form.student_id.data
-        password = form.password.data
-
-        user = query_student_db(
+        user = query_db(
+            STUDENT_DB,
             "SELECT * FROM students WHERE student_id = ?",
-            (student_id,),
+            (form.student_id.data,),
             one=True
         )
-
-        if user and bcrypt.check_password_hash(user[2], password):
+        if user and bcrypt.check_password_hash(user[2], form.password.data):
             return redirect(url_for('dashboard'))
-        else:
-            flash('Invalid Student ID or Password', 'danger')
+        flash("Invalid Student ID or Password", "danger")
 
     return render_template('student_login.html', form=form)
 
+# ---------------- ADMIN ----------------
 @app.route('/admin/signup', methods=['GET', 'POST'])
 def admin_signup():
     form = AdminSignupForm()
     if form.validate_on_submit():
-        admin_id = form.admin_id.data
-        password = form.password.data
-
-        if len(password) < 8:
-            flash("Password must be at least 8 characters.", "danger")
+        if len(form.password.data) < 8:
+            flash("Password must be at least 8 characters", "danger")
             return render_template('admin_signup.html', form=form)
 
-        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-
         try:
-            conn = sqlite3.connect(ADMIN_DB)
-            cur = conn.cursor()
-            cur.execute(
+            query_db(
+                ADMIN_DB,
                 "INSERT INTO admins (admin_id, password) VALUES (?, ?)",
-                (admin_id, hashed_password)
+                (form.admin_id.data,
+                 bcrypt.generate_password_hash(form.password.data).decode())
             )
-            conn.commit()
-            conn.close()
-
-            flash("Admin account created successfully! Please log in.", "success")
+            flash("Admin account created successfully!", "success")
             return redirect(url_for('admin_login'))
-
         except sqlite3.IntegrityError:
-            flash("Admin ID already exists!", "danger")
+            flash("Admin ID already exists", "danger")
 
     return render_template('admin_signup.html', form=form)
 
@@ -163,22 +167,57 @@ def admin_signup():
 def admin_login():
     form = AdminLoginForm()
     if form.validate_on_submit():
-        conn = sqlite3.connect(ADMIN_DB)
-        cur = conn.cursor()
-        cur.execute(
+        admin = query_db(
+            ADMIN_DB,
             "SELECT * FROM admins WHERE admin_id = ?",
-            (form.admin_id.data,)
+            (form.admin_id.data,),
+            one=True
         )
-        admin = cur.fetchone()
-        conn.close()
-
         if admin and bcrypt.check_password_hash(admin[2], form.password.data):
             return redirect(url_for('dashboard'))
-        else:
-            flash('Invalid Admin ID or Password', 'danger')
+        flash("Invalid Admin ID or Password", "danger")
 
     return render_template('admin_login.html', form=form)
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# ---------------- LECTURER ----------------
+@app.route('/lecturer/signup', methods=['GET', 'POST'])
+def lecturer_signup():
+    form = LecturerSignupForm()
+    if form.validate_on_submit():
+        if len(form.password.data) < 8:
+            flash("Password must be at least 8 characters", "danger")
+            return render_template('lecturer_signup.html', form=form)
 
+        try:
+            query_db(
+                LECTURER_DB,
+                "INSERT INTO lecturers (lecturer_id, password) VALUES (?, ?)",
+                (form.lecturer_id.data,
+                 bcrypt.generate_password_hash(form.password.data).decode())
+            )
+            flash("Lecturer account created successfully!", "success")
+            return redirect(url_for('lecturer_login'))
+        except sqlite3.IntegrityError:
+            flash("Lecturer ID already exists", "danger")
+
+    return render_template('lecturer_signup.html', form=form)
+
+@app.route('/lecturer/login', methods=['GET', 'POST'])
+def lecturer_login():
+    form = LecturerLoginForm()
+    if form.validate_on_submit():
+        lecturer = query_db(
+            LECTURER_DB,
+            "SELECT * FROM lecturers WHERE lecturer_id = ?",
+            (form.user_id.data,),
+            one=True
+        )
+        if lecturer and bcrypt.check_password_hash(lecturer[2], form.password.data):
+            return redirect(url_for('dashboard'))
+        flash("Invalid Lecturer ID or Password", "danger")
+
+    return render_template('lecturer_login.html', form=form)
+
+# ---------------- RUN APP ----------------
+if __name__== '__main__':
+    app.run(debug=True)
