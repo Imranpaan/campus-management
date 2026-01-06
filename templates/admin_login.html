@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            width: 350px;
+            background: white;
+            padding: 25px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        label {
+            margin-top: 10px;
+            display: block;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+        button {
+            margin-top: 15px;
+            width: 100%;
+            padding: 10px;
+            background: #343a40;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .alert {
+            margin-bottom: 10px;
+            padding: 8px;
+            color: white;
+        }
+        .alert-danger { background: #dc3545; }
+        .alert-success { background:#09fa41; }
+        .link-box {
+            margin-top: 20px;
+            text-align: center;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+        .link-box a {
+            text-decoration: none;
+            font-weight: bold;
+            display: block;
+            margin-top: 8px;
+        }
+        .signup-link {
+            color: #4b0000;
+        }
+        .home-link {
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Admin Login</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <label>Admin User ID</label>
+        {{ form.admin_id() }}
+
+        <label>Password</label>
+        {{ form.password() }}
+
+        {{ form.submit() }}
+    </form>
+
+    <!-- ✅ ADMIN SIGNUP LINK ADDED -->
+    <div class="link-box">
+        <p>Don't have an admin account?</p>
+
+        <a href="{{ url_for('admin_signup') }}" class="signup-link">
+            Create Admin Account
+        </a>
+
+        <a href="{{ url_for('index') }}" class="home-link">
+            Back to Home
+        </a>
+    </div>
+</div>
+
+</body>
+</html>
