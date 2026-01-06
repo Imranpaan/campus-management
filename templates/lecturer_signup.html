@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lecturer Sign Up</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            width: 350px;
+            background: white;
+            padding: 25px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            margin-top: 10px;
+            display: block;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            margin-top: 15px;
+            width: 100%;
+            padding: 10px;
+            background: #6f42c1; /* Purple for lecturer */
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .alert {
+            padding: 8px;
+            color: white;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .alert-danger {
+            background: #dc3545;
+        }
+        .alert-success {
+            background: #28a745;
+        }
+        .login-link {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .login-link a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Lecturer Sign Up</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <label>Lecturer ID</label>
+        {{ form.lecturer_id() }}
+
+        <label>Password</label>
+        {{ form.password() }}
+
+        {{ form.submit() }}
+    </form>
+
+    <div class="login-link">
+        <p>Already have an account?</p>
+        <a href="{{ url_for('lecturer_login') }}">Login here</a>
+    </div>
+</div>
+
+</body>
+</html>

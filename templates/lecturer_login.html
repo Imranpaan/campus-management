@@ -30,6 +30,7 @@
             width: 100%;
             padding: 8px;
             margin-top: 5px;
+            box-sizing: border-box;
         }
         button {
             margin-top: 15px;
@@ -40,13 +41,20 @@
             border: none;
             cursor: pointer;
         }
+        .signup-btn {
+            background: #6f42c1;
+        }
         .alert {
             margin-bottom: 10px;
             padding: 8px;
             color: white;
         }
         .alert-danger { background: #dc3545; }
-        .alert-success { background:#09fa41; }
+        .alert-success { background: #28a745; }
+        .divider {
+            margin: 15px 0;
+            border-top: 1px solid #eee;
+        }
     </style>
 </head>
 <body>
@@ -64,7 +72,8 @@
 
     <form method="POST">
         {{ form.hidden_tag() }}
-        <label>Lecturer User ID</label>
+
+        <label>Lecturer ID</label>
         {{ form.user_id() }}
 
         <label>Password</label>
@@ -73,9 +82,27 @@
         {{ form.submit() }}
     </form>
 
-    <div style="margin-top: 20px; text-align: center; border-top: 1px solid #eee; padding-top: 15px;">
-        <p>Not a lecturer?</p>
-        <a href="{{ url_for('index') }}" style="text-decoration: none; color: #007bff; font-weight: bold;">Back to home</a>
+    <div class="divider"></div>
+
+    <!-- SIGN UP BUTTON (FORCED) -->
+    <a href="/lecturer/signup"
+       class="signup-btn"
+       style="display:block;
+              text-align:center;
+              padding:10px;
+              color:white;
+              text-decoration:none;
+              border-radius:4px;">
+        Sign Up
+    </a>
+
+    <div class="divider"></div>
+
+    <div style="text-align:center;">
+        <a href="{{ url_for('index') }}"
+           style="text-decoration:none; color:#007bff; font-weight:bold;">
+            Back to Home
+        </a>
     </div>
 </div>
 
