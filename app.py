@@ -6,20 +6,17 @@ from flask_bcrypt import Bcrypt
 import sqlite3
 import os
 
-# ---------------- APP SETUP ----------------
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret123'
 
 bcrypt = Bcrypt(app)
 
-# ---------------- DATABASE PATHS ----------------
 STUDENT_DB = "static/student.db"
 ADMIN_DB = "static/admin.db"
 LECTURER_DB = "static/lecturer.db"
 
 os.makedirs("static", exist_ok=True)
 
-# ---------------- DATABASE INITIALIZATION ----------------
 def init_db(db_path, table_sql):
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
@@ -82,7 +79,6 @@ class LecturerLoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
 
-# ---------------- DATABASE HELPER ----------------
 def query_db(db, query, args=(), one=False):
     conn = sqlite3.connect(db)
     cur = conn.cursor()
@@ -92,7 +88,6 @@ def query_db(db, query, args=(), one=False):
     conn.close()
     return result[0] if one and result else result
 
-# ---------------- ROUTES ----------------
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -101,7 +96,6 @@ def index():
 def dashboard():
     return render_template('dashboard.html')
 
-# ---------------- STUDENT ----------------
 @app.route('/student/signup', methods=['GET', 'POST'])
 def student_signup():
     form = StudentSignupForm()
@@ -140,7 +134,6 @@ def student_login():
 
     return render_template('student_login.html', form=form)
 
-# ---------------- ADMIN ----------------
 @app.route('/admin/signup', methods=['GET', 'POST'])
 def admin_signup():
     form = AdminSignupForm()
@@ -179,7 +172,6 @@ def admin_login():
 
     return render_template('admin_login.html', form=form)
 
-# ---------------- LECTURER ----------------
 @app.route('/lecturer/signup', methods=['GET', 'POST'])
 def lecturer_signup():
     form = LecturerSignupForm()
@@ -218,6 +210,5 @@ def lecturer_login():
 
     return render_template('lecturer_login.html', form=form)
 
-# ---------------- RUN APP ----------------
 if __name__== '__main__':
     app.run(debug=True)
