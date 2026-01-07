@@ -48,7 +48,6 @@ CREATE TABLE IF NOT EXISTS lecturers (
 )
 """)
 
-# ---------------- FORMS ----------------
 class StudentSignupForm(FlaskForm):
     student_id = StringField('Student ID', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
