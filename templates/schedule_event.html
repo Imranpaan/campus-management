@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Schedule Event</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f5f9;
+            margin: 0;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #1f3c88;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        /* Form Container */
+        .container {
+            max-width: 550px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #1f3c88;
+            margin-bottom: 25px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0 15px;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #1f3c88;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #162d63;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Navbar -->
+<div class="navbar">
+    <h3>Schedule Event</h3>
+    <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+</div>
+
+<!-- Form -->
+<div class="container">
+    <h2>Event Details</h2>
+
+    <form>
+        <label>Event Title</label>
+        <input type="text" placeholder="e.g. Tech Talk, Club Meeting">
+
+        <label>Event Date</label>
+        <input type="date">
+
+        <label>Event Time</label>
+        <input type="time">
+
+        <label>Venue / Room</label>
+        <select>
+            <option>Lecture Hall A</option>
+            <option>Lecture Hall B</option>
+            <option>Computer Lab 1</option>
+            <option>Computer Lab 2</option>
+            <option>Auditorium</option>
+        </select>
+
+        <label>Event Type</label>
+        <select>
+            <option>Academic</option>
+            <option>Club Activity</option>
+            <option>Workshop</option>
+            <option>Seminar</option>
+        </select>
+
+        <label>Description</label>
+        <textarea rows="4" placeholder="Brief description of the event"></textarea>
+
+        <button type="submit">Submit Event</button>
+    </form>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View Equipment</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f5f9;
+            margin: 0;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #1f3c88;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        /* Container */
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #1f3c88;
+            margin-bottom: 25px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background-color: #1f3c88;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        button {
+            padding: 5px 12px;
+            background-color: #1f3c88;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #162d63;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Navbar -->
+<div class="navbar">
+    <h3>Campus Equipment</h3>
+    <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+</div>
+
+<!-- Equipment Table -->
+<div class="container">
+    <h2>Available Equipment</h2>
+
+    <table>
+        <tr>
+            <th>Equipment</th>
+            <th>Quantity</th>
+            <th>Location</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+
+        <tr>
+            <td>Projector</td>
+            <td>5</td>
+            <td>Lecture Hall A</td>
+            <td>Available</td>
+            <td><button>Book</button></td>
+        </tr>
+
+        <tr>
+            <td>Microphone</td>
+            <td>10</td>
+            <td>Auditorium</td>
+            <td>Available</td>
+            <td><button>Book</button></td>
+        </tr>
+
+        <tr>
+            <td>Laptop</td>
+            <td>8</td>
+            <td>Computer Lab 1</td>
+            <td>Available</td>
+            <td><button>Book</button></td>
+        </tr>
+
+        <tr>
+            <td>Speaker System</td>
+            <td>2</td>
+            <td>Auditorium</td>
+            <td>Booked</td>
+            <td><button disabled>Book</button></td>
+        </tr>
+    </table>
+</div>
+
+</body>
+</html>

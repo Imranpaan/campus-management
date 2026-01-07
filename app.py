@@ -78,6 +78,15 @@ class LecturerLoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
 
+class EventForm(FlaskForm):
+    title = StringField('Event Title', validators=[DataRequired()])
+    date = StringField('Event Date (YYYY-MM-DD)', validators=[DataRequired()])
+    time = StringField('Event Time (HH:MM)', validators=[DataRequired()])
+    location = StringField('Location / Room', validators=[DataRequired()])
+    description = StringField('Description')
+    submit = SubmitField('Schedule Event')
+
+
 def query_db(db, query, args=(), one=False):
     conn = sqlite3.connect(db)
     cur = conn.cursor()
@@ -94,6 +103,19 @@ def index():
 @app.route('/dashboard')
 def dashboard():
     return render_template('dashboard.html')
+
+@app.route('/schedule-event')
+def schedule_event():
+    return render_template('schedule_event.html')
+
+@app.route('/timetable')
+def timetable():
+    return render_template('timetable.html')
+
+@app.route('/equipment')
+def equipment():
+    return render_template('equipment.html')
+
 
 @app.route('/student/signup', methods=['GET', 'POST'])
 def student_signup():

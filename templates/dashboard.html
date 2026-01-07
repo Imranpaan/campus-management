@@ -102,7 +102,7 @@
 
     <div class="welcome">
         <h1>Welcome!</h1>
-        <p>Manage campus events, book spaces, and view schedules efficiently.</p>
+        <p>Manage campus events, book spaces and equipments, and view schedules efficiently.</p>
     </div>
 
     <!-- Dashboard Cards -->
@@ -111,25 +111,20 @@
         <div class="card">
             <h3>📅 Schedule Event</h3>
             <p>Create and manage campus events with ease.</p>
-            <a href="#">Create Event</a>
-        </div>
-
-        <div class="card">
-            <h3>🏫 Manage Spaces</h3>
-            <p>View and allocate available rooms and venues.</p>
-            <a href="#">View Spaces</a>
+            <a href="{{ url_for('schedule_event') }}">Create Event</a>
         </div>
 
         <div class="card">
             <h3>🕒 View Timetable</h3>
             <p>Check upcoming events and space bookings.</p>
-            <a href="#">View Schedule</a>
+            <a href="{{ url_for('timetable') }}">View Schedule</a>
+
         </div>
 
         <div class="card">
             <h3>🎧 View Equipment</h3>
             <p>Check available equipment and make bookings for campus events.</p>
-            <a href="#">View Equipment</a>
+            <a href="{{ url_for('equipment') }}">View Equipment</a>
         </div>
 
 

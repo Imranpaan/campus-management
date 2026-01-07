@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Event Timetable</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f5f9;
+            margin: 0;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #1f3c88;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        /* Content */
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #1f3c88;
+            margin-bottom: 25px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background-color: #1f3c88;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Navbar -->
+<div class="navbar">
+    <h3>Event Timetable</h3>
+    <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+</div>
+
+<!-- Timetable -->
+<div class="container">
+    <h2>Upcoming Campus Events</h2>
+
+    <table>
+        <tr>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Event</th>
+            <th>Venue</th>
+            <th>Type</th>
+        </tr>
+
+        <tr>
+            <td>2026-01-15</td>
+            <td>10:00 – 12:00</td>
+            <td>Tech Talk: AI in Education</td>
+            <td>Lecture Hall A</td>
+            <td>Academic</td>
+        </tr>
+
+        <tr>
+            <td>2026-01-17</td>
+            <td>14:00 – 16:00</td>
+            <td>Programming Workshop</td>
+            <td>Computer Lab 1</td>
+            <td>Workshop</td>
+        </tr>
+
+        <tr>
+            <td>2026-01-20</td>
+            <td>09:00 – 11:00</td>
+            <td>Student Club Meeting</td>
+            <td>Lecture Hall B</td>
+            <td>Club Activity</td>
+        </tr>
+    </table>
+</div>
+
+</body>
+</html>

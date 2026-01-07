@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reports</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f5f9;
+            margin: 0;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #1f3c88;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        /* Container */
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #1f3c88;
+            margin-bottom: 25px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background-color: #1f3c88;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .status {
+            font-weight: bold;
+        }
+
+        .available {
+            color: green;
+        }
+
+        .booked {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Navbar -->
+<div class="navbar">
+    <h3>System Reports</h3>
+    <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+</div>
+
+<!-- Reports -->
+<div class="container">
+    <h2>Event & Space Reports</h2>
+
+    <table>
+        <tr>
+            <th>Event</th>
+            <th>Venue</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Equipment Booked</th>
+            <th>Status</th>
+        </tr>
+
+        <tr>
+            <td>Tech Talk: AI in Education</td>
+            <td>Lecture Hall A</td>
+            <td>2026-01-15</td>
+            <td>10:00 – 12:00</td>
+            <td>Projector, Microphone</td>
+            <td class="status available">Completed</td>
+        </tr>
+
+        <tr>
+            <td>Programming Workshop</td>
+            <td>Computer Lab 1</td>
+            <td>2026-01-17</td>
+            <td>14:00 –
