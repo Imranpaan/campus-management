@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, flash, session
+from flask import Flask, render_template, redirect, url_for, flash, session, request
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired
@@ -6,6 +6,7 @@ from flask_bcrypt import Bcrypt
 import sqlite3
 import os
 from wtforms import SelectField 
+from datetime import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret123'
@@ -49,7 +50,21 @@ CREATE TABLE IF NOT EXISTS lecturers (
 )
 """)
 
-# This table stores the venue bookings for the Timetable
+
+init_db(ADMIN_DB, """
+CREATE TABLE IF NOT EXISTS equipment_bookings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    equipment_name TEXT NOT NULL,
+    booked_by TEXT NOT NULL,
+    booking_date TEXT NOT NULL,
+    start_time TEXT NOT NULL,  -- When they start
+    end_time TEXT NOT NULL,    -- When they return it
+    user_role TEXT NOT NULL,
+    status TEXT DEFAULT 'Reserved'
+)
+""")
+
+
 init_db(ADMIN_DB, """
 CREATE TABLE IF NOT EXISTS venue_bookings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -61,6 +76,20 @@ CREATE TABLE IF NOT EXISTS venue_bookings (
     user_role TEXT NOT NULL
 )
 """)
+
+init_db(ADMIN_DB, """
+CREATE TABLE IF NOT EXISTS equipment_bookings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    equipment_name TEXT NOT NULL,
+    booked_by TEXT NOT NULL,
+    booking_date TEXT NOT NULL,
+    start_time TEXT NOT NULL,
+    end_time TEXT NOT NULL,
+    user_role TEXT NOT NULL,
+    status TEXT DEFAULT 'Reserved'
+)
+""")
+
 
 class StudentSignupForm(FlaskForm):
     student_id = StringField('Student ID', validators=[DataRequired()])
@@ -159,7 +188,64 @@ def timetable():
 
 @app.route('/equipment')
 def equipment():
-    return render_template('equipment.html')
+    # 1. Check if user is logged in
+    if 'user_id' not in session:
+        flash("Please login first", "danger")
+        return redirect(url_for('student_login'))
+    
+    # 2. BLOCK LECTURERS: If the role is 'lecturer', send them away
+    if session.get('role') == 'lecturer':
+        flash("Access Denied: Lecturers are not permitted to view or book equipment.", "danger")
+        return redirect(url_for('dashboard'))
+    
+    # 3. If they are a student or admin, show the page
+    bookings = query_db(ADMIN_DB, "SELECT * FROM equipment_bookings")
+    return render_template('equipment.html', bookings=bookings)
+
+@app.route('/book-equipment', methods=['POST'])
+def book_equipment():
+    if 'user_id' not in session:
+        flash("Please login first", "danger")
+        return redirect(url_for('student_login'))
+    
+    name = request.form.get('equipment_name')
+    date = request.form.get('date')
+    start = request.form.get('start_time')
+    end = request.form.get('end_time')
+    user_id = session.get('user_id')
+    role = session.get('role')
+
+    # IMPROVED CLASH CHECK
+    # This checks if (NewStart < ExistingEnd) AND (NewEnd > ExistingStart)
+    clash = query_db(ADMIN_DB, """
+        SELECT * FROM equipment_bookings 
+        WHERE equipment_name = ? 
+        AND booking_date = ? 
+        AND (? < end_time AND ? > start_time)
+    """, (name, date, start, end), one=True)
+
+    if clash:
+        flash(f"Sorry, {name} is already booked on {date} during that time!", "danger")
+        return redirect(url_for('equipment'))
+
+    query_db(ADMIN_DB, 
+             "INSERT INTO equipment_bookings (equipment_name, booked_by, booking_date, start_time, end_time, user_role) VALUES (?, ?, ?, ?, ?, ?)",
+             (name, user_id, date, start, end, role))
+    
+    flash(f"{name} reserved from {start} to {end}!", "success")
+    return redirect(url_for('equipment'))
+
+@app.route('/return-equipment/<int:booking_id>')
+def return_equipment(booking_id):
+    # Ensure the user is logged in
+    if 'user_id' not in session:
+        return redirect(url_for('student_login'))
+    
+    # Delete the specific booking using its primary key (ID)
+    query_db(ADMIN_DB, "DELETE FROM equipment_bookings WHERE id = ?", (booking_id,))
+    
+    flash("Equipment returned/booking cancelled.", "info")
+    return redirect(url_for('equipment'))
 
 
 @app.route('/student/signup', methods=['GET', 'POST'])
@@ -282,7 +368,7 @@ def lecturer_login():
 
 @app.route('/logout')
 def logout():
-    session.clear() # This is the most important line to fix your issue
+    session.clear() 
     flash("You have been logged out.", "info")
     return redirect(url_for('index'))
 

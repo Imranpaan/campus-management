@@ -124,7 +124,9 @@
         <div class="card">
             <h3>🎧 View Equipment</h3>
             <p>Check available equipment and make bookings for campus events.</p>
-            <a href="{{ url_for('equipment') }}">View Equipment</a>
+            {% if session.get('role') != 'lecturer' %}
+                <a href="{{ url_for('equipment') }}" class="btn">View Equipment</a>
+            {% endif %}
         </div>
 
 

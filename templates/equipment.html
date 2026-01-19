@@ -3,135 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <title>View Equipment</title>
-
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f5f9;
-            margin: 0;
-        }
-
-        /* Navbar */
-        .navbar {
-            background-color: #1f3c88;
-            color: white;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        /* Container */
-        .container {
-            max-width: 900px;
-            margin: 40px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        h2 {
-            text-align: center;
-            color: #1f3c88;
-            margin-bottom: 25px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-            text-align: center;
-        }
-
-        th {
-            background-color: #1f3c88;
-            color: white;
-        }
-
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-
-        button {
-            padding: 5px 12px;
-            background-color: #1f3c88;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #162d63;
-        }
+        body { font-family: Arial, sans-serif; background-color: #f2f5f9; margin: 0; }
+        .navbar { background-color: #1f3c88; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .navbar a { color: white; text-decoration: none; font-weight: bold; }
+        .container { max-width: 950px; margin: 40px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #1f3c88; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: center; }
+        th { background-color: #1f3c88; color: white; }
+        .return-btn { background-color: #dc3545; color: white; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
-
 <body>
 
-<!-- Navbar -->
 <div class="navbar">
     <h3>Campus Equipment</h3>
     <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
 </div>
 
-<!-- Equipment Table -->
 <div class="container">
-    <h2>Available Equipment</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div style="padding: 15px; margin-bottom: 20px; border-radius: 5px; 
+                      background-color: {{ '#f8d7da' if category == 'danger' else '#d4edda' }}; 
+                      color: {{ '#721c24' if category == 'danger' else '#155724' }}; text-align: center;">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
 
+    <h2>Book New Equipment</h2>
     <table>
-        <tr>
-            <th>Equipment</th>
-            <th>Quantity</th>
-            <th>Location</th>
-            <th>Status</th>
-            <th>Action</th>
-        </tr>
+        <thead>
+            <tr>
+                <th>Equipment</th>
+                <th>Date</th>
+                <th>From</th>
+                <th>Until</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <form action="{{ url_for('book_equipment') }}" method="POST">
+                    <input type="hidden" name="equipment_name" value="Projector">
+                    <td>Projector</td>
+                    <td><input type="date" name="date" required></td>
+                    <td><input type="time" name="start_time" required></td>
+                    <td><input type="time" name="end_time" required></td>
+                    <td><button type="submit" style="background-color: #1f3c88; color: white; border: none; padding: 5px 12px; border-radius: 4px;">Book</button></td>
+                </form>
+            </tr>
+            <tr>
+                <form action="{{ url_for('book_equipment') }}" method="POST">
+                    <input type="hidden" name="equipment_name" value="Laptop">
+                    <td>Laptop</td>
+                    <td><input type="date" name="date" required></td>
+                    <td><input type="time" name="start_time" required></td>
+                    <td><input type="time" name="end_time" required></td>
+                    <td><button type="submit" style="background-color: #1f3c88; color: white; border: none; padding: 5px 12px; border-radius: 4px;">Book</button></td>
+                </form>
+            </tr>
+        </tbody>
+    </table>
 
-        <tr>
-            <td>Projector</td>
-            <td>5</td>
-            <td>Lecture Hall A</td>
-            <td>Available</td>
-            <td><button>Book</button></td>
-        </tr>
+    <hr style="margin: 40px 0;">
 
-        <tr>
-            <td>Microphone</td>
-            <td>10</td>
-            <td>Auditorium</td>
-            <td>Available</td>
-            <td><button>Book</button></td>
-        </tr>
-
-        <tr>
-            <td>Laptop</td>
-            <td>8</td>
-            <td>Computer Lab 1</td>
-            <td>Available</td>
-            <td><button>Book</button></td>
-        </tr>
-
-        <tr>
-            <td>Speaker System</td>
-            <td>2</td>
-            <td>Auditorium</td>
-            <td>Booked</td>
-            <td><button disabled>Book</button></td>
-        </tr>
+    <h2>Current Reservations</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Date</th>
+                <th>Time Range</th>
+                <th>Booked By</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in bookings %}
+            <tr>
+                <td>{{ booking[1] }}</td>
+                <td>{{ booking[3] }}</td>
+                <td>{{ booking[4] }} to {{ booking[5] }}</td>
+                <td>{{ booking[2] }} ({{ booking[6] }})</td>
+                <td><span style="color: green;">{{ booking[7] }}</span></td>
+                <td>
+                    <a href="{{ url_for('return_equipment', booking_id=booking[0]) }}">
+                        <button class="return-btn">Return</button>
+                    </a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6">No items currently reserved.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
 </div>
-
 </body>
 </html>

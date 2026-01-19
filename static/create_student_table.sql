@@ -1,5 +1,0 @@
-CREATE TABLE IF NOT EXISTS students (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    student_id TEXT NOT NULL UNIQUE,
-    password TEXT NOT NULL
-);
