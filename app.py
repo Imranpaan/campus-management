@@ -64,18 +64,19 @@ CREATE TABLE IF NOT EXISTS equipment_bookings (
 )
 """)
 
-
 init_db(ADMIN_DB, """
 CREATE TABLE IF NOT EXISTS venue_bookings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
     date TEXT NOT NULL,
-    time TEXT NOT NULL,
+    start_time TEXT NOT NULL,
+    end_time TEXT NOT NULL,
     location TEXT NOT NULL,
     booked_by TEXT NOT NULL,
     user_role TEXT NOT NULL
 )
 """)
+
 
 init_db(ADMIN_DB, """
 CREATE TABLE IF NOT EXISTS equipment_bookings (
@@ -123,16 +124,9 @@ class LecturerLoginForm(FlaskForm):
 
 class EventForm(FlaskForm):
     title = StringField('Event Title', validators=[DataRequired()])
-    date = StringField('Event Date (YYYY-MM-DD)', validators=[DataRequired()])
-    time = StringField('Event Time (HH:MM)', validators=[DataRequired()])
-    location = StringField('Location / Room', validators=[DataRequired()])
-    description = StringField('Description')
-    submit = SubmitField('Schedule Event')
-
-class EventForm(FlaskForm):
-    title = StringField('Event Title', validators=[DataRequired()])
     date = StringField('Event Date', validators=[DataRequired()])
-    time = StringField('Event Time', validators=[DataRequired()])
+    start_time = StringField('Start Time', validators=[DataRequired()])
+    end_time = StringField('End Time', validators=[DataRequired()])
     location = SelectField('Venue', choices=[
         ('Lecture Hall A', 'Lecture Hall A'),
         ('Lecture Hall B', 'Lecture Hall B'),
@@ -152,6 +146,8 @@ def query_db(db, query, args=(), one=False):
     conn.close()
     return result[0] if one and result else result
 
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -162,29 +158,74 @@ def dashboard():
 
 @app.route('/schedule-event', methods=['GET', 'POST'])
 def schedule_event():
+    if 'user_id' not in session:
+        flash("Please login first", "danger")
+        return redirect(url_for('index'))
+
     form = EventForm()
+
     if form.validate_on_submit():
-        # Capture data from form and user session
         user_id = session.get('user_id')
         role = session.get('role')
 
+        date = form.date.data
+        start_time = form.start_time.data
+        end_time = form.end_time.data
+        location = form.location.data
+
+        # 🔴 VENUE CLASH CHECK
+        clash = query_db(
+            ADMIN_DB,
+            """
+            SELECT * FROM venue_bookings
+            WHERE date = ?
+              AND location = ?
+              AND (? < end_time AND ? > start_time)
+            """,
+            (date, location, start_time, end_time),
+            one=True
+        )
+
+        if clash:
+            flash(
+                f"Venue clash! {location} is already booked during that time.",
+                "danger"
+            )
+            return render_template('schedule_event.html', form=form)
+
+        # ✅ NO CLASH → INSERT EVENT
         query_db(
             ADMIN_DB,
-            "INSERT INTO venue_bookings (title, date, time, location, booked_by, user_role) VALUES (?, ?, ?, ?, ?, ?)",
-            (form.title.data, form.date.data, form.time.data, form.location.data, user_id, role)
+            """
+            INSERT INTO venue_bookings
+            (title, date, start_time, end_time, location, booked_by, user_role)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                form.title.data,
+                date,
+                start_time,
+                end_time,
+                location,
+                user_id,
+                role
+            )
         )
+
         flash("Event scheduled successfully!", "success")
         return redirect(url_for('timetable'))
 
     return render_template('schedule_event.html', form=form)
 
+
 @app.route('/timetable')
 def timetable():
-    # Fetch all venue bookings to show on the schedule
-    events = query_db(ADMIN_DB, "SELECT * FROM venue_bookings ORDER BY date, time")
-    
-    # We will pass 'events' to the HTML
+    events = query_db(
+        ADMIN_DB,
+        "SELECT * FROM venue_bookings ORDER BY date, start_time"
+    )
     return render_template('timetable.html', events=events)
+
 
 @app.route('/equipment')
 def equipment():

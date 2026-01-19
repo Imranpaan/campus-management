@@ -71,6 +71,20 @@
         button:hover {
             background-color: #162d63;
         }
+
+        /* Flash messages (ERROR ONLY) */
+        .alert {
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .alert-danger {
+            background-color: #dc3545;
+            color: white;
+        }
     </style>
 </head>
 
@@ -85,19 +99,38 @@
 <!-- Form -->
 <div class="container">
     <h2>Event Details</h2>
+
+    <!-- Flash Messages (exclude success) -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        {% if category != 'success' %}
+          <div class="alert alert-{{ category }}">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endwith %}
+
     <form method="POST" action="{{ url_for('schedule_event') }}">
-        {{ form.hidden_tag() }} <label>Event Title</label>
+        {{ form.hidden_tag() }}
+
+        <label>Event Title</label>
         {{ form.title(placeholder="e.g. Tech Talk, Club Meeting") }}
 
         <label>Event Date</label>
         {{ form.date(type="date") }}
 
-        <label>Event Time</label>
-        {{ form.time(type="time") }}
+        <label>Start Time</label>
+        {{ form.start_time(type="time") }}
+
+        <label>End Time</label>
+        {{ form.end_time(type="time") }}
 
         <label>Venue / Room</label>
-        {{ form.location() }} <label>Description</label>
-        {{ form.description(rows="4", placeholder="Brief description of the event") }}
+        {{ form.location() }}
+
+        <label>Description</label>
+        {{ form.description(placeholder="Brief description of the event") }}
 
         {{ form.submit() }}
     </form>
