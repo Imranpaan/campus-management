@@ -85,38 +85,21 @@
 <!-- Form -->
 <div class="container">
     <h2>Event Details</h2>
-
-    <form>
-        <label>Event Title</label>
-        <input type="text" placeholder="e.g. Tech Talk, Club Meeting">
+    <form method="POST" action="{{ url_for('schedule_event') }}">
+        {{ form.hidden_tag() }} <label>Event Title</label>
+        {{ form.title(placeholder="e.g. Tech Talk, Club Meeting") }}
 
         <label>Event Date</label>
-        <input type="date">
+        {{ form.date(type="date") }}
 
         <label>Event Time</label>
-        <input type="time">
+        {{ form.time(type="time") }}
 
         <label>Venue / Room</label>
-        <select>
-            <option>Lecture Hall A</option>
-            <option>Lecture Hall B</option>
-            <option>Computer Lab 1</option>
-            <option>Computer Lab 2</option>
-            <option>Auditorium</option>
-        </select>
+        {{ form.location() }} <label>Description</label>
+        {{ form.description(rows="4", placeholder="Brief description of the event") }}
 
-        <label>Event Type</label>
-        <select>
-            <option>Academic</option>
-            <option>Club Activity</option>
-            <option>Workshop</option>
-            <option>Seminar</option>
-        </select>
-
-        <label>Description</label>
-        <textarea rows="4" placeholder="Brief description of the event"></textarea>
-
-        <button type="submit">Submit Event</button>
+        {{ form.submit() }}
     </form>
 </div>
 

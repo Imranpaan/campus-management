@@ -76,39 +76,22 @@
 <!-- Timetable -->
 <div class="container">
     <h2>Upcoming Campus Events</h2>
-
     <table>
         <tr>
             <th>Date</th>
             <th>Time</th>
             <th>Event</th>
             <th>Venue</th>
-            <th>Type</th>
-        </tr>
+            <th>Booked By</th> </tr>
 
+        {% for event in events %}
         <tr>
-            <td>2026-01-15</td>
-            <td>10:00 – 12:00</td>
-            <td>Tech Talk: AI in Education</td>
-            <td>Lecture Hall A</td>
-            <td>Academic</td>
-        </tr>
-
+<td>{{ event[2] }}</td> <td>{{ event[3] }}</td> <td>{{ event[1] }}</td> <td>{{ event[4] }}</td> <td>{{ event[5] }} ({{ event[6] }})</td> </tr>
+        {% else %}
         <tr>
-            <td>2026-01-17</td>
-            <td>14:00 – 16:00</td>
-            <td>Programming Workshop</td>
-            <td>Computer Lab 1</td>
-            <td>Workshop</td>
+            <td colspan="5">No events scheduled yet.</td>
         </tr>
-
-        <tr>
-            <td>2026-01-20</td>
-            <td>09:00 – 11:00</td>
-            <td>Student Club Meeting</td>
-            <td>Lecture Hall B</td>
-            <td>Club Activity</td>
-        </tr>
+        {% endfor %}
     </table>
 </div>
 

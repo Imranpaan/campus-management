@@ -1,10 +1,11 @@
-from flask import Flask, render_template, redirect, url_for, flash
+from flask import Flask, render_template, redirect, url_for, flash, session
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired
 from flask_bcrypt import Bcrypt
 import sqlite3
 import os
+from wtforms import SelectField 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret123'
@@ -48,6 +49,19 @@ CREATE TABLE IF NOT EXISTS lecturers (
 )
 """)
 
+# This table stores the venue bookings for the Timetable
+init_db(ADMIN_DB, """
+CREATE TABLE IF NOT EXISTS venue_bookings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    date TEXT NOT NULL,
+    time TEXT NOT NULL,
+    location TEXT NOT NULL,
+    booked_by TEXT NOT NULL,
+    user_role TEXT NOT NULL
+)
+""")
+
 class StudentSignupForm(FlaskForm):
     student_id = StringField('Student ID', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
@@ -86,6 +100,19 @@ class EventForm(FlaskForm):
     description = StringField('Description')
     submit = SubmitField('Schedule Event')
 
+class EventForm(FlaskForm):
+    title = StringField('Event Title', validators=[DataRequired()])
+    date = StringField('Event Date', validators=[DataRequired()])
+    time = StringField('Event Time', validators=[DataRequired()])
+    location = SelectField('Venue', choices=[
+        ('Lecture Hall A', 'Lecture Hall A'),
+        ('Lecture Hall B', 'Lecture Hall B'),
+        ('Computer Lab 1', 'Computer Lab 1'),
+        ('Auditorium', 'Auditorium')
+    ])
+    description = StringField('Description')
+    submit = SubmitField('Submit Event')
+
 
 def query_db(db, query, args=(), one=False):
     conn = sqlite3.connect(db)
@@ -104,13 +131,31 @@ def index():
 def dashboard():
     return render_template('dashboard.html')
 
-@app.route('/schedule-event')
+@app.route('/schedule-event', methods=['GET', 'POST'])
 def schedule_event():
-    return render_template('schedule_event.html')
+    form = EventForm()
+    if form.validate_on_submit():
+        # Capture data from form and user session
+        user_id = session.get('user_id')
+        role = session.get('role')
+
+        query_db(
+            ADMIN_DB,
+            "INSERT INTO venue_bookings (title, date, time, location, booked_by, user_role) VALUES (?, ?, ?, ?, ?, ?)",
+            (form.title.data, form.date.data, form.time.data, form.location.data, user_id, role)
+        )
+        flash("Event scheduled successfully!", "success")
+        return redirect(url_for('timetable'))
+
+    return render_template('schedule_event.html', form=form)
 
 @app.route('/timetable')
 def timetable():
-    return render_template('timetable.html')
+    # Fetch all venue bookings to show on the schedule
+    events = query_db(ADMIN_DB, "SELECT * FROM venue_bookings ORDER BY date, time")
+    
+    # We will pass 'events' to the HTML
+    return render_template('timetable.html', events=events)
 
 @app.route('/equipment')
 def equipment():
@@ -150,6 +195,8 @@ def student_login():
             one=True
         )
         if user and bcrypt.check_password_hash(user[2], form.password.data):
+            session['role'] = 'student'
+            session['user_id'] = user[1]
             return redirect(url_for('dashboard'))
         flash("Invalid Student ID or Password", "danger")
 
@@ -226,10 +273,18 @@ def lecturer_login():
             one=True
         )
         if lecturer and bcrypt.check_password_hash(lecturer[2], form.password.data):
+            session['role'] = 'lecturer'
+            session['user_id'] = lecturer[1]
             return redirect(url_for('dashboard'))
         flash("Invalid Lecturer ID or Password", "danger")
 
     return render_template('lecturer_login.html', form=form)
+
+@app.route('/logout')
+def logout():
+    session.clear() # This is the most important line to fix your issue
+    flash("You have been logged out.", "info")
+    return redirect(url_for('index'))
 
 if __name__== '__main__':
     app.run(debug=True)
