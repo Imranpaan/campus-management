@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Management</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f5f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #1f3c88;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h2 {
+            margin: 0;
+        }
+
+        .nav-btn {
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .logout-btn {
+            background-color: #dc3545;
+        }
+
+        .nav-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Content */
+        .content {
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #1f3c88;
+        }
+
+        /* Card */
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+
+        .card h3 {
+            color: #1f3c88;
+            margin-bottom: 20px;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f4f6fb;
+        }
+
+        .active {
+            color: green;
+            font-weight: bold;
+        }
+
+        .inactive {
+            color: red;
+            font-weight: bold;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 7px 12px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 2px;
+            display: inline-block;
+        }
+
+        .btn-deactivate {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-reset {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .btn-deactivate:hover,
+        .btn-reset:hover {
+            opacity: 0.9;
+        }
+
+        .btn-reactivate {
+    background-color: #28a745;
+    color: white;
+    }
+    .btn-reactivate:hover {
+    opacity: 0.9;
+    }
+    </style>
+</head>
+
+<body>
+
+<!-- Navbar -->
+<div class="navbar">
+    <h2>Campus Event Scheduling & Space Management System</h2>
+    <div>
+        <a href="{{ url_for('dashboard') }}" class="nav-btn">Dashboard</a>
+        <a href="{{ url_for('logout') }}" class="nav-btn logout-btn">Logout</a>
+    </div>
+</div>
+
+<!-- Content -->
+<div class="content">
+
+    <h1>User Management</h1>
+
+    <!-- Students -->
+    <div class="card">
+        <h3>🎓 Students</h3>
+        <table>
+            <tr>
+                <th>Student ID</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            {% for student in students %}
+            <tr>
+                <td>{{ student[0] }}</td>
+                <td class="{{ student[1] }}">{{ student[1].capitalize() }}</td>
+                <td>
+    {% if student[1] == 'active' %}
+        <a class="btn btn-deactivate"
+           href="{{ url_for('deactivate_user', user_type='student', user_id=student[0]) }}"
+           onclick="return confirm('Deactivate this student?');">
+            Deactivate
+        </a>
+    {% else %}
+        <a class="btn btn-reactivate"
+           href="{{ url_for('reactivate_user', user_type='student', user_id=student[0]) }}"
+           onclick="return confirm('Reactivate this student?');">
+            Reactivate
+        </a>
+    {% endif %}
+
+    <a class="btn btn-reset"
+       href="{{ url_for('reset_password', user_type='student', user_id=student[0]) }}"
+       onclick="return confirm('Reset password for this student?');">
+        Reset Password
+    </a>
+</td>
+
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <!-- Lecturers -->
+    <div class="card">
+        <h3>👨‍🏫 Lecturers</h3>
+        <table>
+            <tr>
+                <th>Lecturer ID</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            {% for lecturer in lecturers %}
+            <tr>
+                <td>{{ lecturer[0] }}</td>
+                <td class="{{ lecturer[1] }}">{{ lecturer[1].capitalize() }}</td>
+                <td>
+    {% if lecturer[1] == 'active' %}
+        <a class="btn btn-deactivate"
+           href="{{ url_for('deactivate_user', user_type='lecturer', user_id=lecturer[0]) }}"
+           onclick="return confirm('Deactivate this lecturer?');">
+            Deactivate
+        </a>
+    {% else %}
+        <a class="btn btn-reactivate"
+           href="{{ url_for('reactivate_user', user_type='lecturer', user_id=lecturer[0]) }}"
+           onclick="return confirm('Reactivate this lecturer?');">
+            Reactivate
+        </a>
+    {% endif %}
+
+    <a class="btn btn-reset"
+       href="{{ url_for('reset_password', user_type='lecturer', user_id=lecturer[0]) }}"
+       onclick="return confirm('Reset password for this lecturer?');">
+        Reset Password
+    </a>
+</td>
+
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+</div>
+
+</body>
+</html>

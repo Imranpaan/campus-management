@@ -118,17 +118,37 @@
             <h3>🕒 View Timetable</h3>
             <p>Check upcoming events and space bookings.</p>
             <a href="{{ url_for('timetable') }}">View Schedule</a>
+<<<<<<< HEAD
+=======
 
+>>>>>>> aed71131a49e84fa326825970e933310d749bc7b
         </div>
 
         <div class="card">
             <h3>🎧 View Equipment</h3>
             <p>Check available equipment and make bookings for campus events.</p>
             {% if session.get('role') != 'lecturer' %}
+<<<<<<< HEAD
+                <a href="{{ url_for('equipment') }}">View Equipment</a>
+            {% else %}
+                <p style="color:red; font-weight:bold;">Lecturers are not allowed</p>
+            {% endif %}
+        </div>
+
+        <!-- ✅ ADMIN ONLY -->
+        {% if session.get('role') == 'admin' %}
+        <div class="card">
+            <h3>👥 User Management</h3>
+            <p>Manage users, deactivate accounts, and reset passwords.</p>
+            <a href="{{ url_for('manage_users') }}">Manage Users</a>
+        </div>
+        {% endif %}
+=======
                 <a href="{{ url_for('equipment') }}" class="btn">View Equipment</a>
             {% endif %}
         </div>
 
+>>>>>>> aed71131a49e84fa326825970e933310d749bc7b
 
         <div class="card">
             <h3>📊 Reports</h3>
@@ -141,4 +161,8 @@
 </div>
 
 </body>
+<<<<<<< HEAD
 </html>
+=======
+</html>
+>>>>>>> aed71131a49e84fa326825970e933310d749bc7b
