@@ -156,7 +156,6 @@ def index():
 def dashboard():
     return render_template('dashboard.html')
 
-<<<<<<< HEAD
 @app.route('/admin/users')
 def manage_users():
     # Optional: restrict only admin
@@ -252,8 +251,6 @@ def reset_password(user_type, user_id):
     flash(f"Temporary password for {user_id}: {temp_password}", "warning")
     return redirect(url_for('manage_users'))
 
-=======
->>>>>>> aed71131a49e84fa326825970e933310d749bc7b
 @app.route('/schedule-event', methods=['GET', 'POST'])
 def schedule_event():
     if 'user_id' not in session:
@@ -412,7 +409,6 @@ def student_signup():
 @app.route('/student/login', methods=['GET', 'POST'])
 def student_login():
     form = StudentLoginForm()
-<<<<<<< HEAD
 
     if form.validate_on_submit():
         user = query_db(
@@ -422,32 +418,16 @@ def student_login():
             one=True
         )
 
-=======
-    if form.validate_on_submit():
-        user = query_db(
-            STUDENT_DB,
-            "SELECT * FROM students WHERE student_id = ?",
-            (form.student_id.data,),
-            one=True
-        )
->>>>>>> aed71131a49e84fa326825970e933310d749bc7b
         if user and bcrypt.check_password_hash(user[2], form.password.data):
             session['role'] = 'student'
             session['user_id'] = user[1]
             return redirect(url_for('dashboard'))
-<<<<<<< HEAD
 
         flash("Invalid credentials or account inactive", "danger")
 
     return render_template('student_login.html', form=form)
 
 
-=======
-        flash("Invalid Student ID or Password", "danger")
-
-    return render_template('student_login.html', form=form)
-
->>>>>>> aed71131a49e84fa326825970e933310d749bc7b
 @app.route('/admin/signup', methods=['GET', 'POST'])
 def admin_signup():
     form = AdminSignupForm()
@@ -473,10 +453,6 @@ def admin_signup():
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
     form = AdminLoginForm()
-<<<<<<< HEAD
-
-=======
->>>>>>> aed71131a49e84fa326825970e933310d749bc7b
     if form.validate_on_submit():
         admin = query_db(
             ADMIN_DB,
@@ -484,25 +460,16 @@ def admin_login():
             (form.admin_id.data,),
             one=True
         )
-<<<<<<< HEAD
 
         if admin and bcrypt.check_password_hash(admin[2], form.password.data):
             session['role'] = 'admin'          # ✅ REQUIRED
             session['user_id'] = admin[1]      # ✅ REQUIRED
             return redirect(url_for('dashboard'))
 
-=======
-        if admin and bcrypt.check_password_hash(admin[2], form.password.data):
-            return redirect(url_for('dashboard'))
->>>>>>> aed71131a49e84fa326825970e933310d749bc7b
         flash("Invalid Admin ID or Password", "danger")
 
     return render_template('admin_login.html', form=form)
 
-<<<<<<< HEAD
-
-=======
->>>>>>> aed71131a49e84fa326825970e933310d749bc7b
 @app.route('/lecturer/signup', methods=['GET', 'POST'])
 def lecturer_signup():
     form = LecturerSignupForm()
@@ -528,7 +495,6 @@ def lecturer_signup():
 @app.route('/lecturer/login', methods=['GET', 'POST'])
 def lecturer_login():
     form = LecturerLoginForm()
-<<<<<<< HEAD
 
     if form.validate_on_submit():
         lecturer = query_db(
@@ -541,32 +507,16 @@ def lecturer_login():
             one=True
         )
 
-=======
-    if form.validate_on_submit():
-        lecturer = query_db(
-            LECTURER_DB,
-            "SELECT * FROM lecturers WHERE lecturer_id = ?",
-            (form.user_id.data,),
-            one=True
-        )
->>>>>>> aed71131a49e84fa326825970e933310d749bc7b
         if lecturer and bcrypt.check_password_hash(lecturer[2], form.password.data):
             session['role'] = 'lecturer'
             session['user_id'] = lecturer[1]
             return redirect(url_for('dashboard'))
-<<<<<<< HEAD
 
         flash("Invalid credentials or account deactivated", "danger")
 
     return render_template('lecturer_login.html', form=form)
 
 
-=======
-        flash("Invalid Lecturer ID or Password", "danger")
-
-    return render_template('lecturer_login.html', form=form)
-
->>>>>>> aed71131a49e84fa326825970e933310d749bc7b
 @app.route('/logout')
 def logout():
     session.clear() 
