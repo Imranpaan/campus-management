@@ -446,8 +446,13 @@ def student_login():
             session['role'] = 'student'
             session['user_id'] = user[1]
             return redirect(url_for('dashboard'))
+<<<<<<< HEAD
         else:
             flash("Invalid credentials or account inactive", "danger")
+=======
+
+        flash("Invalid credentials or account inactive", "danger")
+>>>>>>> eb0e47fb946aef14dc867a57e33de82e7f0a6690
 
     return render_template('student_login.html', form=form)
 
@@ -477,8 +482,11 @@ def admin_signup():
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
     form = AdminLoginForm()
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> eb0e47fb946aef14dc867a57e33de82e7f0a6690
     if form.validate_on_submit():
         admin = query_db(
             ADMIN_DB,
@@ -486,22 +494,31 @@ def admin_login():
             (form.admin_id.data,),
             one=True
         )
+<<<<<<< HEAD
 
+=======
+>>>>>>> eb0e47fb946aef14dc867a57e33de82e7f0a6690
 
         if admin and bcrypt.check_password_hash(admin[2], form.password.data):
             session['role'] = 'admin'          # ✅ REQUIRED
             session['user_id'] = admin[1]      # ✅ REQUIRED
             return redirect(url_for('dashboard'))
 
+<<<<<<< HEAD
 
         if admin and bcrypt.check_password_hash(admin[2], form.password.data):
             return redirect(url_for('dashboard'))
 
+=======
+>>>>>>> eb0e47fb946aef14dc867a57e33de82e7f0a6690
         flash("Invalid Admin ID or Password", "danger")
 
     return render_template('admin_login.html', form=form)
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> eb0e47fb946aef14dc867a57e33de82e7f0a6690
 @app.route('/lecturer/signup', methods=['GET', 'POST'])
 def lecturer_signup():
     form = LecturerSignupForm()
@@ -543,8 +560,13 @@ def lecturer_login():
             session['role'] = 'lecturer'
             session['user_id'] = lecturer[1]
             return redirect(url_for('dashboard'))
+<<<<<<< HEAD
         else:
             flash("Invalid Lecturer ID or Password", "danger")
+=======
+
+        flash("Invalid credentials or account deactivated", "danger")
+>>>>>>> eb0e47fb946aef14dc867a57e33de82e7f0a6690
 
     return render_template('lecturer_login.html', form=form)
 
@@ -554,6 +576,7 @@ def upload_file():
         flash("Access denied", "danger")
         return redirect(url_for("dashboard"))
 
+<<<<<<< HEAD
     if request.method == "POST":
         file = request.files.get("file")
 
@@ -649,6 +672,8 @@ def delete_file(file_id):
     return redirect(url_for("lecturer_files"))
 
 
+=======
+>>>>>>> eb0e47fb946aef14dc867a57e33de82e7f0a6690
 @app.route('/logout')
 def logout():
     session.clear() 
