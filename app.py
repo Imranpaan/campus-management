@@ -560,13 +560,8 @@ def lecturer_login():
             session['role'] = 'lecturer'
             session['user_id'] = lecturer[1]
             return redirect(url_for('dashboard'))
-<<<<<<< HEAD
-        else:
-            flash("Invalid Lecturer ID or Password", "danger")
-=======
 
         flash("Invalid credentials or account deactivated", "danger")
->>>>>>> eb0e47fb946aef14dc867a57e33de82e7f0a6690
 
     return render_template('lecturer_login.html', form=form)
 
@@ -576,104 +571,6 @@ def upload_file():
         flash("Access denied", "danger")
         return redirect(url_for("dashboard"))
 
-<<<<<<< HEAD
-    if request.method == "POST":
-        file = request.files.get("file")
-
-        if not file or file.filename == "":
-            flash("No file selected", "danger")
-            return redirect(request.url)
-
-        if not allowed_file(file.filename):
-            flash("File type not allowed", "danger")
-            return redirect(request.url)
-
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
-
-        
-        query_db(
-            LECTURER_DB,
-            """
-            INSERT INTO uploaded_files (lecturer_id, filename, upload_time)
-            VALUES (?, ?, ?)
-            """,
-            (
-                session.get("user_id"),
-                filename,
-                datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            )
-        )
-
-        flash("File uploaded successfully!", "success")
-        return redirect(url_for("lecturer_files"))
-
-    return render_template("lecturer_upload.html")
-
-@app.route("/lecturer/files")
-def lecturer_files():
-    # 🔒 Only lecturers allowed
-    if session.get("role") != "lecturer":
-        flash("Access denied", "danger")
-        return redirect(url_for("dashboard"))
-
-    rows = query_db(
-        LECTURER_DB,
-        """
-        SELECT id, lecturer_id, filename, upload_time
-        FROM uploaded_files
-        WHERE lecturer_id = ?
-        ORDER BY upload_time DESC
-        """,
-        (session.get("user_id"),)
-    )
-
-    files = []
-    for file_id, lecturer_id, filename, upload_time in rows:
-        date, time = upload_time.split(" ")
-        files.append((file_id, filename, date, time))
-
-    return render_template("lecturer_files.html", files=files)
-
-@app.route("/lecturer/delete/<int:file_id>")
-def delete_file(file_id):
-    # Only lecturers allowed
-    if session.get("role") != "lecturer":
-        flash("Access denied", "danger")
-        return redirect(url_for("dashboard"))
-
-    # Get filename from DB
-    file = query_db(
-        LECTURER_DB,
-        "SELECT filename FROM uploaded_files WHERE id = ?",
-        (file_id,),
-        one=True
-    )
-
-    if not file:
-        flash("File not found", "danger")
-        return redirect(url_for("lecturer_files"))
-
-    filename = file[0]
-
-    # Delete file from folder
-    filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-    if os.path.exists(filepath):
-        os.remove(filepath)
-
-    # Delete record from DB
-    query_db(
-        LECTURER_DB,
-        "DELETE FROM uploaded_files WHERE id = ?",
-        (file_id,)
-    )
-
-    flash("File deleted successfully", "success")
-    return redirect(url_for("lecturer_files"))
-
-
-=======
->>>>>>> eb0e47fb946aef14dc867a57e33de82e7f0a6690
 @app.route('/logout')
 def logout():
     session.clear() 
