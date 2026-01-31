@@ -446,13 +446,13 @@ def student_login():
             session['role'] = 'student'
             session['user_id'] = user[1]
             return redirect(url_for('dashboard'))
-<<<<<<< HEAD
+
         else:
             flash("Invalid credentials or account inactive", "danger")
-=======
+
 
         flash("Invalid credentials or account inactive", "danger")
->>>>>>> eb0e47fb946aef14dc867a57e33de82e7f0a6690
+
 
     return render_template('student_login.html', form=form)
 
@@ -482,11 +482,9 @@ def admin_signup():
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
     form = AdminLoginForm()
-<<<<<<< HEAD
 
 
-=======
->>>>>>> eb0e47fb946aef14dc867a57e33de82e7f0a6690
+
     if form.validate_on_submit():
         admin = query_db(
             ADMIN_DB,
@@ -494,31 +492,28 @@ def admin_login():
             (form.admin_id.data,),
             one=True
         )
-<<<<<<< HEAD
 
-=======
->>>>>>> eb0e47fb946aef14dc867a57e33de82e7f0a6690
+
 
         if admin and bcrypt.check_password_hash(admin[2], form.password.data):
             session['role'] = 'admin'          # ✅ REQUIRED
             session['user_id'] = admin[1]      # ✅ REQUIRED
             return redirect(url_for('dashboard'))
 
-<<<<<<< HEAD
 
         if admin and bcrypt.check_password_hash(admin[2], form.password.data):
             return redirect(url_for('dashboard'))
 
-=======
->>>>>>> eb0e47fb946aef14dc867a57e33de82e7f0a6690
+
+
         flash("Invalid Admin ID or Password", "danger")
 
     return render_template('admin_login.html', form=form)
 
-<<<<<<< HEAD
 
-=======
->>>>>>> eb0e47fb946aef14dc867a57e33de82e7f0a6690
+
+
+
 @app.route('/lecturer/signup', methods=['GET', 'POST'])
 def lecturer_signup():
     form = LecturerSignupForm()
@@ -570,6 +565,98 @@ def upload_file():
     if session.get("role") != "lecturer":
         flash("Access denied", "danger")
         return redirect(url_for("dashboard"))
+
+    # GET → show page
+    if request.method == "GET":
+        return render_template("lecturer_upload.html")
+
+    # POST → handle upload
+    file = request.files.get("file")
+
+    if not file or file.filename == "":
+        flash("No file selected", "danger")
+        return redirect(request.url)
+
+    if not allowed_file(file.filename):
+        flash("File type not allowed", "danger")
+        return redirect(request.url)
+
+    filename = secure_filename(file.filename)
+    file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+
+    query_db(
+        LECTURER_DB,
+        """
+        INSERT INTO uploaded_files (lecturer_id, filename, upload_time)
+        VALUES (?, ?, ?)
+        """,
+        (
+            session.get("user_id"),
+            filename,
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        )
+    )
+
+    flash("File uploaded successfully!", "success")
+    return redirect(url_for("lecturer_files"))
+
+@app.route("/lecturer/files")
+def lecturer_files():
+    if session.get("role") != "lecturer":
+        flash("Access denied", "danger")
+        return redirect(url_for("dashboard"))
+
+    rows = query_db(
+        LECTURER_DB,
+        """
+        SELECT id, filename, upload_time
+        FROM uploaded_files
+        WHERE lecturer_id = ?
+        ORDER BY upload_time DESC
+        """,
+        (session.get("user_id"),)
+    )
+
+    files = []
+    for file_id, filename, upload_time in rows:
+        date, time = upload_time.split(" ")
+        files.append((file_id, filename, date, time))
+
+    return render_template("lecturer_files.html", files=files)
+
+@app.route("/lecturer/delete/<int:file_id>")
+def delete_file(file_id):
+    if session.get("role") != "lecturer":
+        flash("Access denied", "danger")
+        return redirect(url_for("dashboard"))
+
+    file = query_db(
+        LECTURER_DB,
+        "SELECT filename FROM uploaded_files WHERE id = ?",
+        (file_id,),
+        one=True
+    )
+
+    if not file:
+        flash("File not found", "danger")
+        return redirect(url_for("lecturer_files"))
+
+    filename = file[0]
+
+    filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+    if os.path.exists(filepath):
+        os.remove(filepath)
+
+    query_db(
+        LECTURER_DB,
+        "DELETE FROM uploaded_files WHERE id = ?",
+        (file_id,)
+    )
+
+    flash("File deleted successfully", "success")
+    return redirect(url_for("lecturer_files"))
+
+
 
 @app.route('/logout')
 def logout():
