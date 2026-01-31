@@ -3,15 +3,30 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired
 from flask_bcrypt import Bcrypt
+from werkzeug.utils import secure_filename
 import sqlite3
 import os
 from wtforms import SelectField 
 from datetime import datetime
 
 app = Flask(__name__)
+
 app.config['SECRET_KEY'] = 'secret123'
 
 bcrypt = Bcrypt(app)
+
+# ===== File upload config =====
+
+UPLOAD_FOLDER = "static/uploads"
+ALLOWED_EXTENSIONS = {"pdf", "docx", "pptx", "jpg", "png"}
+
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # 5 MB
+
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 STUDENT_DB = "static/student.db"
 ADMIN_DB = "static/admin.db"
@@ -47,6 +62,15 @@ CREATE TABLE IF NOT EXISTS lecturers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     lecturer_id TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL
+)
+""")
+
+init_db(LECTURER_DB, """
+CREATE TABLE IF NOT EXISTS uploaded_files (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    lecturer_id TEXT NOT NULL,
+    filename TEXT NOT NULL,
+    upload_time TEXT NOT NULL
 )
 """)
 
@@ -156,7 +180,6 @@ def index():
 def dashboard():
     return render_template('dashboard.html')
 
-<<<<<<< HEAD
 @app.route('/admin/users')
 def manage_users():
     # Optional: restrict only admin
@@ -252,8 +275,6 @@ def reset_password(user_type, user_id):
     flash(f"Temporary password for {user_id}: {temp_password}", "warning")
     return redirect(url_for('manage_users'))
 
-=======
->>>>>>> aed71131a49e84fa326825970e933310d749bc7b
 @app.route('/schedule-event', methods=['GET', 'POST'])
 def schedule_event():
     if 'user_id' not in session:
@@ -412,7 +433,6 @@ def student_signup():
 @app.route('/student/login', methods=['GET', 'POST'])
 def student_login():
     form = StudentLoginForm()
-<<<<<<< HEAD
 
     if form.validate_on_submit():
         user = query_db(
@@ -422,32 +442,16 @@ def student_login():
             one=True
         )
 
-=======
-    if form.validate_on_submit():
-        user = query_db(
-            STUDENT_DB,
-            "SELECT * FROM students WHERE student_id = ?",
-            (form.student_id.data,),
-            one=True
-        )
->>>>>>> aed71131a49e84fa326825970e933310d749bc7b
         if user and bcrypt.check_password_hash(user[2], form.password.data):
             session['role'] = 'student'
             session['user_id'] = user[1]
             return redirect(url_for('dashboard'))
-<<<<<<< HEAD
-
-        flash("Invalid credentials or account inactive", "danger")
-
-    return render_template('student_login.html', form=form)
-
-
-=======
-        flash("Invalid Student ID or Password", "danger")
+        else:
+            flash("Invalid credentials or account inactive", "danger")
 
     return render_template('student_login.html', form=form)
 
->>>>>>> aed71131a49e84fa326825970e933310d749bc7b
+
 @app.route('/admin/signup', methods=['GET', 'POST'])
 def admin_signup():
     form = AdminSignupForm()
@@ -473,10 +477,8 @@ def admin_signup():
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
     form = AdminLoginForm()
-<<<<<<< HEAD
 
-=======
->>>>>>> aed71131a49e84fa326825970e933310d749bc7b
+
     if form.validate_on_submit():
         admin = query_db(
             ADMIN_DB,
@@ -484,25 +486,22 @@ def admin_login():
             (form.admin_id.data,),
             one=True
         )
-<<<<<<< HEAD
+
 
         if admin and bcrypt.check_password_hash(admin[2], form.password.data):
             session['role'] = 'admin'          # ✅ REQUIRED
             session['user_id'] = admin[1]      # ✅ REQUIRED
             return redirect(url_for('dashboard'))
 
-=======
+
         if admin and bcrypt.check_password_hash(admin[2], form.password.data):
             return redirect(url_for('dashboard'))
->>>>>>> aed71131a49e84fa326825970e933310d749bc7b
+
         flash("Invalid Admin ID or Password", "danger")
 
     return render_template('admin_login.html', form=form)
 
-<<<<<<< HEAD
 
-=======
->>>>>>> aed71131a49e84fa326825970e933310d749bc7b
 @app.route('/lecturer/signup', methods=['GET', 'POST'])
 def lecturer_signup():
     form = LecturerSignupForm()
@@ -528,7 +527,6 @@ def lecturer_signup():
 @app.route('/lecturer/login', methods=['GET', 'POST'])
 def lecturer_login():
     form = LecturerLoginForm()
-<<<<<<< HEAD
 
     if form.validate_on_submit():
         lecturer = query_db(
@@ -541,37 +539,123 @@ def lecturer_login():
             one=True
         )
 
-=======
-    if form.validate_on_submit():
-        lecturer = query_db(
-            LECTURER_DB,
-            "SELECT * FROM lecturers WHERE lecturer_id = ?",
-            (form.user_id.data,),
-            one=True
-        )
->>>>>>> aed71131a49e84fa326825970e933310d749bc7b
         if lecturer and bcrypt.check_password_hash(lecturer[2], form.password.data):
             session['role'] = 'lecturer'
             session['user_id'] = lecturer[1]
             return redirect(url_for('dashboard'))
-<<<<<<< HEAD
-
-        flash("Invalid credentials or account deactivated", "danger")
-
-    return render_template('lecturer_login.html', form=form)
-
-
-=======
-        flash("Invalid Lecturer ID or Password", "danger")
+        else:
+            flash("Invalid Lecturer ID or Password", "danger")
 
     return render_template('lecturer_login.html', form=form)
 
->>>>>>> aed71131a49e84fa326825970e933310d749bc7b
+@app.route("/lecturer/upload", methods=["GET", "POST"])
+def upload_file():
+    if session.get("role") != "lecturer":
+        flash("Access denied", "danger")
+        return redirect(url_for("dashboard"))
+
+    if request.method == "POST":
+        file = request.files.get("file")
+
+        if not file or file.filename == "":
+            flash("No file selected", "danger")
+            return redirect(request.url)
+
+        if not allowed_file(file.filename):
+            flash("File type not allowed", "danger")
+            return redirect(request.url)
+
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+
+        
+        query_db(
+            LECTURER_DB,
+            """
+            INSERT INTO uploaded_files (lecturer_id, filename, upload_time)
+            VALUES (?, ?, ?)
+            """,
+            (
+                session.get("user_id"),
+                filename,
+                datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            )
+        )
+
+        flash("File uploaded successfully!", "success")
+        return redirect(url_for("lecturer_files"))
+
+    return render_template("lecturer_upload.html")
+
+@app.route("/lecturer/files")
+def lecturer_files():
+    # 🔒 Only lecturers allowed
+    if session.get("role") != "lecturer":
+        flash("Access denied", "danger")
+        return redirect(url_for("dashboard"))
+
+    rows = query_db(
+        LECTURER_DB,
+        """
+        SELECT id, lecturer_id, filename, upload_time
+        FROM uploaded_files
+        WHERE lecturer_id = ?
+        ORDER BY upload_time DESC
+        """,
+        (session.get("user_id"),)
+    )
+
+    files = []
+    for file_id, lecturer_id, filename, upload_time in rows:
+        date, time = upload_time.split(" ")
+        files.append((file_id, filename, date, time))
+
+    return render_template("lecturer_files.html", files=files)
+
+@app.route("/lecturer/delete/<int:file_id>")
+def delete_file(file_id):
+    # Only lecturers allowed
+    if session.get("role") != "lecturer":
+        flash("Access denied", "danger")
+        return redirect(url_for("dashboard"))
+
+    # Get filename from DB
+    file = query_db(
+        LECTURER_DB,
+        "SELECT filename FROM uploaded_files WHERE id = ?",
+        (file_id,),
+        one=True
+    )
+
+    if not file:
+        flash("File not found", "danger")
+        return redirect(url_for("lecturer_files"))
+
+    filename = file[0]
+
+    # Delete file from folder
+    filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+    if os.path.exists(filepath):
+        os.remove(filepath)
+
+    # Delete record from DB
+    query_db(
+        LECTURER_DB,
+        "DELETE FROM uploaded_files WHERE id = ?",
+        (file_id,)
+    )
+
+    flash("File deleted successfully", "success")
+    return redirect(url_for("lecturer_files"))
+
+
 @app.route('/logout')
 def logout():
     session.clear() 
     flash("You have been logged out.", "info")
     return redirect(url_for('index'))
+
+
 
 if __name__== '__main__':
     app.run(debug=True)

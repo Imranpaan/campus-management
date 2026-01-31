@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Uploaded Files</title>
+
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f2f5f9;
+        margin: 0;
+        padding: 0;
+    }
+
+    .delete-btn {
+        color: #e53935;
+        font-size: 18px;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .delete-btn:hover {
+        transform: scale(1.2);
+        color: #c62828;
+    }
+
+
+    .navbar {
+        background-color: #1f3c88;
+        color: white;
+        padding: 15px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .navbar h2 {
+        margin: 0;
+        font-size: 20px;
+    }
+
+    .nav-btn {
+        background-color: #ffffff;
+        color: #1f3c88;
+        text-decoration: none;
+        padding: 8px 14px;
+        border-radius: 5px;
+        font-weight: bold;
+    }
+
+    .nav-btn:hover {
+        background-color: #e0e6f5;
+    }
+
+    .container {
+        display: flex;
+        justify-content: center;
+        padding: 50px 20px;
+    }
+
+    .card {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        width: 100%;
+        max-width: 600px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    </style>
+
+</head>
+
+<body>
+<body>
+
+<div class="navbar">
+    <h2>Uploaded Files</h2>
+    <a href="{{ url_for('dashboard') }}" class="nav-btn">Back to Dashboard</a>
+</div>
+
+<div class="container">
+    <div class="card">
+        <h2>📁 Uploaded Files</h2>
+
+        <table width="100%" cellspacing="0" cellpadding="10">
+    <thead style="background:#1f3c88; color:white;">
+        <tr>
+            <th align="left">Filename</th>
+            <th align="center">Date</th>
+            <th align="center">Time</th>
+            <th align="center">Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+  {% for f in files %}
+<tr style="border-bottom:1px solid #ddd;">
+    <td>{{ f[1] }}</td>
+    <td align="center">{{ f[2] }}</td>
+    <td align="center">{{ f[3] }}</td>
+    <td align="center">
+        <a href="{{ url_for('delete_file', file_id=f[0]) }}"
+           class="delete-btn"
+           title="Delete file"
+           onclick="return confirm('Delete this file?');">
+           🗑
+        </a>
+    </td>
+</tr>
+{% endfor %}
+
+    </tbody>
+
+</table>
+
+    </div>
+</div>
+
+</body>
+
+</html>

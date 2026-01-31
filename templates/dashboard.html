@@ -12,7 +12,6 @@
             padding: 0;
         }
 
-        /* Navbar */
         .navbar {
             background-color: #1f3c88;
             color: white;
@@ -39,7 +38,6 @@
             background-color: #c82333;
         }
 
-        /* Content */
         .content {
             padding: 40px;
         }
@@ -91,13 +89,11 @@
 
 <body>
 
-<!-- Navbar -->
 <div class="navbar">
     <h2>Campus Event Scheduling & Space Management System</h2>
     <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
 </div>
 
-<!-- Main Content -->
 <div class="content">
 
     <div class="welcome">
@@ -105,64 +101,63 @@
         <p>Manage campus events, book spaces and equipments, and view schedules efficiently.</p>
     </div>
 
-    <!-- Dashboard Cards -->
-    <div class="dashboard">
+   <div class="dashboard">
 
-        <div class="card">
-            <h3>📅 Schedule Event</h3>
-            <p>Create and manage campus events with ease.</p>
-            <a href="{{ url_for('schedule_event') }}">Create Event</a>
-        </div>
-
-        <div class="card">
-            <h3>🕒 View Timetable</h3>
-            <p>Check upcoming events and space bookings.</p>
-            <a href="{{ url_for('timetable') }}">View Schedule</a>
-<<<<<<< HEAD
-=======
-
->>>>>>> aed71131a49e84fa326825970e933310d749bc7b
-        </div>
-
-        <div class="card">
-            <h3>🎧 View Equipment</h3>
-            <p>Check available equipment and make bookings for campus events.</p>
-            {% if session.get('role') != 'lecturer' %}
-<<<<<<< HEAD
-                <a href="{{ url_for('equipment') }}">View Equipment</a>
-            {% else %}
-                <p style="color:red; font-weight:bold;">Lecturers are not allowed</p>
-            {% endif %}
-        </div>
-
-        <!-- ✅ ADMIN ONLY -->
-        {% if session.get('role') == 'admin' %}
-        <div class="card">
-            <h3>👥 User Management</h3>
-            <p>Manage users, deactivate accounts, and reset passwords.</p>
-            <a href="{{ url_for('manage_users') }}">Manage Users</a>
-        </div>
-        {% endif %}
-=======
-                <a href="{{ url_for('equipment') }}" class="btn">View Equipment</a>
-            {% endif %}
-        </div>
-
->>>>>>> aed71131a49e84fa326825970e933310d749bc7b
-
-        <div class="card">
-            <h3>📊 Reports</h3>
-            <p>Analyze space usage and event statistics.</p>
-            <a href="#">View Reports</a>
-        </div>
-
+    <div class="card">
+        <h3>📅 Schedule Event</h3>
+        <p>Create and manage campus events with ease.</p>
+        <a href="{{ url_for('schedule_event') }}">Create Event</a>
     </div>
+
+    <div class="card">
+        <h3>🕒 View Timetable</h3>
+        <p>Check upcoming events and space bookings.</p>
+        <a href="{{ url_for('timetable') }}">View Schedule</a>
+    </div>
+
+    <div class="card">
+        <h3>🎧 View Equipment</h3>
+        <p>Check available equipment and make bookings for campus events.</p>
+
+        {% if session.get('role') != 'lecturer' %}
+            <a href="{{ url_for('equipment') }}">View Equipment</a>
+        {% else %}
+            <p style="color:red; font-weight:bold;">Lecturers are not allowed</p>
+        {% endif %}
+    </div>
+
+    {% if session.get('role') == 'admin' %}
+    <div class="card">
+        <h3>👥 User Management</h3>
+        <p>Manage users, deactivate accounts, and reset passwords.</p>
+        <a href="{{ url_for('manage_users') }}">Manage Users</a>
+    </div>
+    {% endif %}
+
+    <div class="card">
+        <h3>📊 Reports</h3>
+        <p>Analyze space usage and event statistics.</p>
+        <a href="#">View Reports</a>
+    </div>
+
+   {% if session.get('role') == 'lecturer' %}
+    <div class="card">
+        <h3>📎 Upload Files</h3>
+        <p>Upload and attach digital materials to classes or events.</p>
+
+        <div style="margin-top: 15px;">
+        <a href="{{ url_for('upload_file') }}" class="btn">Upload File</a>
+    </div>
+
+    <div style="margin-top: 10px;">
+        <a href="{{ url_for('lecturer_files') }}" class="btn">View Uploaded Files</a>
+    </div>
+
+    {% endif %}
+
 
 </div>
 
+
 </body>
-<<<<<<< HEAD
 </html>
-=======
-</html>
->>>>>>> aed71131a49e84fa326825970e933310d749bc7b
