@@ -62,6 +62,34 @@
         tr:hover {
             background-color: #f1f1f1;
         }
+
+         /* Status badges */
+        .badge {
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-weight: bold;
+            color: white;
+            display: inline-block;
+            font-size: 14px;
+        }
+
+        .badge-pending {
+            background-color: #f0ad4e;
+        }
+
+        .badge-approved {
+            background-color: #28a745;
+        }
+
+        .badge-rejected {
+            background-color: #dc3545;
+        }
+
+        /* Unavailability styling */
+        .unavailable {
+            background-color: #ffe6e6;
+        }
+
     </style>
 </head>
 
@@ -85,15 +113,77 @@
             <th>Booked By</th> </tr>
 
         {% for event in events %}
-        <tr>
-<td>{{ event[2] }}</td> <td>{{ event[3] }}</td> <td>{{ event[1] }}</td> <td>{{ event[4] }}</td> <td>{{ event[5] }} ({{ event[6] }})</td> </tr>
+<tr>
+    <td>{{ event[2] }}</td>
+    <td>{{ event[3] }}</td>
+    <td>{{ event[1] }}</td>
+    <td>{{ event[5] }}</td>
+    <td>{{ event[6] }} ({{ event[7] }})</td>
+
+    <td>
+        {% if session.get('role') == 'admin' and event[8] == 'pending' %}
+            <a href="{{ url_for('approve_reject_booking', booking_id=event[0], action='approve') }}"
+               style="color: green; font-weight: bold;">Approve</a>
+            |
+            <a href="{{ url_for('approve_reject_booking', booking_id=event[0], action='reject') }}"
+               style="color: red; font-weight: bold;">Reject</a>
         {% else %}
-        <tr>
-            <td colspan="5">No events scheduled yet.</td>
-        </tr>
-        {% endfor %}
-    </table>
+            {% if event[8] == 'pending' %}
+                <span class="badge badge-pending">Pending</span>
+            {% elif event[8] == 'approved' %}
+                <span class="badge badge-approved">Approved</span>
+            {% elif event[8] == 'rejected' %}
+                <span class="badge badge-rejected">Rejected</span>
+            {% else %}
+                {{ event[8] }}
+            {% endif %}
+        {% endif %}
+    </td>
+</tr>
+
+{% else %}
+<tr>
+    <td colspan="6">No events scheduled yet.</td>
+</tr>
+{% endfor %}
+</table>
+
+<!-- ✅ ADDED: Venue Unavailability Section (from HTML 1) -->
+<h2 style="margin-top:40px;">Venue Unavailability</h2>
+<table>
+    <tr>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Venue</th>
+        <th>Reason</th>
+        {% if session.get('role') == 'admin' %}
+            <th>Action</th>
+        {% endif %}
+    </tr>
+
+    {% for u in unavailable %}
+    <tr class="unavailable">
+        <td>{{ u[1] }}</td>
+        <td>{{ u[2] }} - {{ u[3] }}</td>
+        <td>{{ u[0] }}</td>
+        <td>{{ u[4] or 'Unavailable' }}</td>
+
+        {% if session.get('role') == 'admin' %}
+        <td>
+            <a href="{{ url_for('delete_unavailability', uid=u[0], date=u[1], start=u[2]) }}"
+               style="color:red;font-weight:bold;">Remove</a>
+        </td>
+        {% endif %}
+    </tr>
+
+    {% else %}
+    <tr>
+        <td colspan="5">No unavailable slots.</td>
+    </tr>
+    {% endfor %}
+</table>
 </div>
 
 </body>
 </html>
+
