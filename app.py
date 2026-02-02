@@ -45,7 +45,8 @@ init_db(STUDENT_DB, """
 CREATE TABLE IF NOT EXISTS students (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     student_id TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL
+    password TEXT NOT NULL,
+    status TEXT DEFAULT 'active'
 )
 """)
 
@@ -71,6 +72,7 @@ CREATE TABLE IF NOT EXISTS uploaded_files (
     lecturer_id TEXT NOT NULL,
     filename TEXT NOT NULL,
     upload_time TEXT NOT NULL
+    status TEXT DEFAULT 'active
 )
 """)
 
@@ -112,6 +114,26 @@ CREATE TABLE IF NOT EXISTS equipment_bookings (
     end_time TEXT NOT NULL,
     user_role TEXT NOT NULL,
     status TEXT DEFAULT 'Reserved'
+)
+""")
+
+init_db(ADMIN_DB, """
+CREATE TABLE IF NOT EXISTS venue_unavailability (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    location TEXT NOT NULL,
+    date TEXT NOT NULL,
+    start_time TEXT NOT NULL,
+    end_time TEXT NOT NULL,
+    reason TEXT NOT NULL
+)
+""")
+
+init_db(ADMIN_DB, """
+CREATE TABLE IF NOT EXISTS announcements (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    message TEXT NOT NULL,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
 )
 """)
 
@@ -178,8 +200,14 @@ def index():
 
 @app.route('/dashboard')
 def dashboard():
-    return render_template('dashboard.html')
-
+    announcements = query_db(
+        ADMIN_DB,
+        "SELECT * FROM announcements ORDER BY created_at DESC"
+    )
+    return render_template(
+        'dashboard.html',
+        announcements=announcements
+    )
 @app.route('/admin/users')
 def manage_users():
     # Optional: restrict only admin
@@ -311,24 +339,47 @@ def schedule_event():
                 "danger"
             )
             return render_template('schedule_event.html', form=form)
+        
+         # 🔴 UNAVAILABILITY CHECK (maintenance / special events)
+        unavailable = query_db(
+            ADMIN_DB,
+            """
+            SELECT * FROM venue_unavailability
+            WHERE date = ?
+            AND location = ?
+            AND (? < end_time AND ? > start_time)
+            """,
+            (date, location, start_time, end_time),
+            one=True
+        )
 
-        # ✅ NO CLASH → INSERT EVENT
+        if unavailable:
+            flash(
+                f"{location} is unavailable during that time (maintenance or special event).",
+                "danger"
+            )
+            return render_template('schedule_event.html', form=form)
+
+
+       # ✅ NO CLASH → INSERT EVENT
         query_db(
             ADMIN_DB,
             """
             INSERT INTO venue_bookings
-            (title, date, start_time, end_time, location, booked_by, user_role)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            (title, date, start_time, end_time, location, booked_by, user_role, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
-                form.title.data,
-                date,
-                start_time,
-                end_time,
-                location,
-                user_id,
-                role
+            form.title.data,
+            date,
+            start_time,
+            end_time,
+            location,
+            user_id,
+            role,
+            'pending'
             )
+
         )
 
         flash("Event scheduled successfully!", "success")
@@ -336,14 +387,181 @@ def schedule_event():
 
     return render_template('schedule_event.html', form=form)
 
+@app.route('/admin/unavailable', methods=['GET', 'POST'])
+def set_unavailable():
+    if session.get('role') != 'admin':
+        flash("Access denied", "danger")
+        return redirect(url_for('dashboard'))
+
+    if request.method == 'POST':
+        location = request.form.get('location')
+        date = request.form.get('date')
+        start_time = request.form.get('start_time')
+        end_time = request.form.get('end_time')
+        reason = request.form.get('reason')
+
+        query_db(
+            ADMIN_DB,
+            """
+            INSERT INTO venue_unavailability
+            (location, date, start_time, end_time, reason)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (location, date, start_time, end_time, reason)
+        )
+
+        flash("Venue marked as unavailable.", "success")
+        return redirect(url_for('timetable'))
+
+    return render_template('set_unavailable.html')
+
+@app.route('/admin/unavailable/delete')
+def delete_unavailability():
+    if session.get('role') != 'admin':
+        flash("Access denied", "danger")
+        return redirect(url_for('timetable'))
+
+    location = request.args.get('uid')
+    date = request.args.get('date')
+    start = request.args.get('start')
+
+    query_db(
+        ADMIN_DB,
+        """
+        DELETE FROM venue_unavailability
+        WHERE location = ? AND date = ? AND start_time = ?
+        """,
+        (location, date, start)
+    )
+
+    flash("Unavailability removed.", "success")
+    return redirect(url_for('timetable'))
+
+# ================================
+# ADMIN APPROVE / REJECT BOOKINGS
+# ================================
+@app.route('/admin/booking/<int:booking_id>/<action>')
+def approve_reject_booking(booking_id, action):
+    if session.get('role') != 'admin':
+        flash("Access denied", "danger")
+        return redirect(url_for('dashboard'))
+
+    if action not in ['approve', 'reject']:
+        flash("Invalid action", "danger")
+        return redirect(url_for('timetable'))
+
+    status = 'approved' if action == 'approve' else 'rejected'
+
+    query_db(
+        ADMIN_DB,
+        "UPDATE venue_bookings SET status = ? WHERE id = ?",
+        (status, booking_id)
+    )
+
+    flash(f"Booking {status}.", "success")
+    return redirect(url_for('timetable'))
 
 @app.route('/timetable')
 def timetable():
+    # Existing bookings (KEEP AS IS)
     events = query_db(
         ADMIN_DB,
-        "SELECT * FROM venue_bookings ORDER BY date, start_time"
+        """
+        SELECT
+            id,
+            title,
+            date,
+            start_time,
+            end_time,
+            location,
+            booked_by,
+            user_role,
+            status
+        FROM venue_bookings
+        ORDER BY date, start_time
+        """
     )
-    return render_template('timetable.html', events=events)
+
+    # 🔴 ADDITION: venue unavailability (maintenance / special events)
+    unavailable = query_db(
+        ADMIN_DB,
+        """
+        SELECT
+            location,
+            date,
+            start_time,
+            end_time,
+            reason
+        FROM venue_unavailability
+        ORDER BY date, start_time
+        """
+    )
+
+    # Pass BOTH to the template
+    return render_template(
+        'timetable.html',
+        events=events,
+        unavailable=unavailable
+    )
+
+@app.route('/admin/reports')
+def admin_reports():
+    if session.get('role') != 'admin':
+        flash("Access denied", "danger")
+        return redirect(url_for('dashboard'))
+
+    # Total bookings
+    total_bookings = query_db(
+        ADMIN_DB,
+        "SELECT COUNT(*) FROM venue_bookings",
+        one=True
+    )[0]
+
+    # Bookings per venue
+    bookings_by_venue = query_db(
+        ADMIN_DB,
+        """
+        SELECT location, COUNT(*)
+        FROM venue_bookings
+        GROUP BY location
+        """
+    )
+
+    # Bookings by role
+    bookings_by_role = query_db(
+        ADMIN_DB,
+        """
+        SELECT user_role, COUNT(*)
+        FROM venue_bookings
+        GROUP BY user_role
+        """
+    )
+
+    # Booking status distribution
+    bookings_by_status = query_db(
+        ADMIN_DB,
+        """
+        SELECT status, COUNT(*)
+        FROM venue_bookings
+        GROUP BY status
+        """
+    )
+
+    # Venue unavailability count
+    total_unavailable = query_db(
+        ADMIN_DB,
+        "SELECT COUNT(*) FROM venue_unavailability",
+        one=True
+    )[0]
+
+    return render_template(
+        'reports.html',
+        total_bookings=total_bookings,
+        bookings_by_venue=bookings_by_venue,
+        bookings_by_role=bookings_by_role,
+        bookings_by_status=bookings_by_status,
+        total_unavailable=total_unavailable
+    )
 
 
 @app.route('/equipment')
@@ -511,7 +729,49 @@ def admin_login():
     return render_template('admin_login.html', form=form)
 
 
+@app.route('/admin/announcements', methods=['GET', 'POST'])
+def admin_announcements():
+    if session.get('role') != 'admin' and 'user_id' not in session:
+        flash("Access denied", "danger")
+        return redirect(url_for('dashboard'))
 
+    if request.method == 'POST':
+        title = request.form.get('title')
+        message = request.form.get('message')
+
+        query_db(
+            ADMIN_DB,
+            "INSERT INTO announcements (title, message) VALUES (?, ?)",
+            (title, message)
+        )
+
+        flash("Announcement posted successfully.", "success")
+        return redirect(url_for('admin_announcements'))
+
+    announcements = query_db(
+        ADMIN_DB,
+        "SELECT * FROM announcements ORDER BY created_at DESC"
+    )
+
+    return render_template(
+        'admin_announcements.html',
+        announcements=announcements
+    )
+
+@app.route('/admin/announcements/delete/<int:aid>')
+def delete_announcement(aid):
+    if session.get('role') != 'admin':
+        flash("Access denied", "danger")
+        return redirect(url_for('dashboard'))
+
+    query_db(
+        ADMIN_DB,
+        "DELETE FROM announcements WHERE id = ?",
+        (aid,)
+    )
+
+    flash("Announcement removed.", "info")
+    return redirect(url_for('admin_announcements'))
 
 
 @app.route('/lecturer/signup', methods=['GET', 'POST'])
