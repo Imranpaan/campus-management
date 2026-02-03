@@ -89,11 +89,28 @@
 
 <body>
 
+<!-- Navbar -->
 <div class="navbar">
     <h2>Campus Event Scheduling & Space Management System</h2>
-    <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+
+    <div style="display:flex; gap:10px; align-items:center;">
+        <a href="{{ url_for('admin_announcements') }}"
+           style="
+               background-color:#ffc107;
+               color:black;
+               text-decoration:none;
+               padding:8px 15px;
+               border-radius:4px;
+               font-weight:bold;
+           ">
+           📢 Announcements
+        </a>
+
+        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+    </div>
 </div>
 
+<!-- Main Content -->
 <div class="content">
 
     <div class="welcome">
@@ -101,6 +118,7 @@
         <p>Manage campus events, book spaces and equipments, and view schedules efficiently.</p>
     </div>
 
+    <!-- Dashboard Cards -->
    <div class="dashboard">
 
     <div class="card">
@@ -126,20 +144,37 @@
         {% endif %}
     </div>
 
+    <!-- ✅ ADMIN ONLY -->
     {% if session.get('role') == 'admin' %}
     <div class="card">
         <h3>👥 User Management</h3>
         <p>Manage users, deactivate accounts, and reset passwords.</p>
         <a href="{{ url_for('manage_users') }}">Manage Users</a>
     </div>
-    {% endif %}
 
     <div class="card">
         <h3>📊 Reports</h3>
         <p>Analyze space usage and event statistics.</p>
-        <a href="#">View Reports</a>
+       <a href="{{ url_for('admin_reports') }}" class="btn btn-primary">
+        View Reports
+       </a>
+
     </div>
 
+
+    <div class="card">
+        <h3>Venue Availability</h3>
+        <p>Mark venues unavailable for maintenance or special events.</p>
+        <a href="{{ url_for('set_unavailable') }}" class="btn btn-primary">
+        Manage Venue
+    </a>
+    </div>
+</div>
+
+
+    {% endif %}
+
+    
    {% if session.get('role') == 'lecturer' %}
     <div class="card">
         <h3>📎 Upload Files</h3>

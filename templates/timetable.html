@@ -110,7 +110,8 @@
             <th>Time</th>
             <th>Event</th>
             <th>Venue</th>
-            <th>Booked By</th> </tr>
+            <th>Booked By</th>
+            <th>Action</th> </tr>
 
         {% for event in events %}
 <tr>
@@ -122,10 +123,10 @@
 
     <td>
         {% if session.get('role') == 'admin' and event[8] == 'pending' %}
-            <a href="{{ url_for('approve_reject_booking', booking_id=event[0], action='approve') }}"
+            <a href="{{ url_for('approve_reject_booking', booking_id=event[0], action='approve') }}" class="btn btn-danger btn-sm"
                style="color: green; font-weight: bold;">Approve</a>
             |
-            <a href="{{ url_for('approve_reject_booking', booking_id=event[0], action='reject') }}"
+            <a href="{{ url_for('approve_reject_booking', booking_id=event[0], action='reject') }}" class="btn btn-danger btn-sm"
                style="color: red; font-weight: bold;">Reject</a>
         {% else %}
             {% if event[8] == 'pending' %}

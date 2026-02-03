@@ -13,6 +13,23 @@
         th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: center; }
         th { background-color: #1f3c88; color: white; }
         .return-btn { background-color: #dc3545; color: white; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; }
+
+        /* ✅ Added from HTML 1 (no function change) */
+        .flash {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .flash-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .flash-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
     </style>
 </head>
 <body>
@@ -23,12 +40,11 @@
 </div>
 
 <div class="container">
+
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
-          <div style="padding: 15px; margin-bottom: 20px; border-radius: 5px; 
-                      background-color: {{ '#f8d7da' if category == 'danger' else '#d4edda' }}; 
-                      color: {{ '#721c24' if category == 'danger' else '#155724' }}; text-align: center;">
+          <div class="flash {{ 'flash-danger' if category == 'danger' else 'flash-success' }}">
             {{ message }}
           </div>
         {% endfor %}
@@ -47,6 +63,7 @@
             </tr>
         </thead>
         <tbody>
+
             <tr>
                 <form action="{{ url_for('book_equipment') }}" method="POST">
                     <input type="hidden" name="equipment_name" value="Projector">
@@ -54,9 +71,14 @@
                     <td><input type="date" name="date" required></td>
                     <td><input type="time" name="start_time" required></td>
                     <td><input type="time" name="end_time" required></td>
-                    <td><button type="submit" style="background-color: #1f3c88; color: white; border: none; padding: 5px 12px; border-radius: 4px;">Book</button></td>
+                    <td>
+                        <button type="submit" style="background-color:#1f3c88; color:white; border:none; padding:5px 12px; border-radius:4px;">
+                            Book
+                        </button>
+                    </td>
                 </form>
             </tr>
+
             <tr>
                 <form action="{{ url_for('book_equipment') }}" method="POST">
                     <input type="hidden" name="equipment_name" value="Laptop">
@@ -64,9 +86,14 @@
                     <td><input type="date" name="date" required></td>
                     <td><input type="time" name="start_time" required></td>
                     <td><input type="time" name="end_time" required></td>
-                    <td><button type="submit" style="background-color: #1f3c88; color: white; border: none; padding: 5px 12px; border-radius: 4px;">Book</button></td>
+                    <td>
+                        <button type="submit" style="background-color:#1f3c88; color:white; border:none; padding:5px 12px; border-radius:4px;">
+                            Book
+                        </button>
+                    </td>
                 </form>
             </tr>
+
         </tbody>
     </table>
 
@@ -105,6 +132,7 @@
             {% endfor %}
         </tbody>
     </table>
+
 </div>
 </body>
 </html>

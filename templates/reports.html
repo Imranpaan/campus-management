@@ -37,15 +37,19 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
+        h2, h3 {
+            color: #1f3c88;
+            margin-bottom: 20px;
+        }
+
         h2 {
             text-align: center;
-            color: #1f3c88;
-            margin-bottom: 25px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-bottom: 30px;
         }
 
         th, td {
@@ -59,20 +63,12 @@
             color: white;
         }
 
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-
-        .status {
+        .stat {
+            font-size: 20px;
             font-weight: bold;
-        }
-
-        .available {
-            color: green;
-        }
-
-        .booked {
-            color: red;
+            color: #1f3c88;
+            margin-bottom: 30px;
+            text-align: center;
         }
     </style>
 </head>
@@ -87,29 +83,61 @@
 
 <!-- Reports -->
 <div class="container">
-    <h2>Event & Space Reports</h2>
 
+    <h2>Usage & Booking Reports</h2>
+
+    <!-- ✅ Stats (from report.html 1) -->
+    <div class="stat">
+        Total Bookings: {{ total_bookings }} <br>
+        Total Venue Unavailability Entries: {{ total_unavailable }}
+    </div>
+
+    <!-- ✅ Bookings by Venue -->
+    <h3>Bookings by Venue</h3>
     <table>
         <tr>
-            <th>Event</th>
             <th>Venue</th>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Equipment Booked</th>
+            <th>Total Bookings</th>
+        </tr>
+        {% for v in bookings_by_venue %}
+        <tr>
+            <td>{{ v[0] }}</td>
+            <td>{{ v[1] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- ✅ Bookings by User Role -->
+    <h3>Bookings by User Role</h3>
+    <table>
+        <tr>
+            <th>User Role</th>
+            <th>Total Bookings</th>
+        </tr>
+        {% for r in bookings_by_role %}
+        <tr>
+            <td>{{ r[0] }}</td>
+            <td>{{ r[1] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- ✅ Booking Status Overview -->
+    <h3>Booking Status Overview</h3>
+    <table>
+        <tr>
             <th>Status</th>
+            <th>Total</th>
         </tr>
-
+        {% for s in bookings_by_status %}
         <tr>
-            <td>Tech Talk: AI in Education</td>
-            <td>Lecture Hall A</td>
-            <td>2026-01-15</td>
-            <td>10:00 – 12:00</td>
-            <td>Projector, Microphone</td>
-            <td class="status available">Completed</td>
+            <td>{{ s[0] }}</td>
+            <td>{{ s[1] }}</td>
         </tr>
+        {% endfor %}
+    </table>
 
-        <tr>
-            <td>Programming Workshop</td>
-            <td>Computer Lab 1</td>
-            <td>2026-01-17</td>
-            <td>14:00 –
+</div>
+
+</body>
+</html>

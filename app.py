@@ -62,7 +62,8 @@ init_db(LECTURER_DB, """
 CREATE TABLE IF NOT EXISTS lecturers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     lecturer_id TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL
+    password TEXT NOT NULL,
+    status TEXT DEFAULT 'active'
 )
 """)
 
@@ -71,8 +72,8 @@ CREATE TABLE IF NOT EXISTS uploaded_files (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     lecturer_id TEXT NOT NULL,
     filename TEXT NOT NULL,
-    upload_time TEXT NOT NULL
-    status TEXT DEFAULT 'active
+    upload_time TEXT NOT NULL,
+    status TEXT DEFAULT 'active'
 )
 """)
 
@@ -89,7 +90,6 @@ CREATE TABLE IF NOT EXISTS equipment_bookings (
     status TEXT DEFAULT 'Reserved'
 )
 """)
-
 init_db(ADMIN_DB, """
 CREATE TABLE IF NOT EXISTS venue_bookings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -99,10 +99,10 @@ CREATE TABLE IF NOT EXISTS venue_bookings (
     end_time TEXT NOT NULL,
     location TEXT NOT NULL,
     booked_by TEXT NOT NULL,
-    user_role TEXT NOT NULL
+    user_role TEXT NOT NULL,
+    status TEXT DEFAULT 'pending'
 )
 """)
-
 
 init_db(ADMIN_DB, """
 CREATE TABLE IF NOT EXISTS equipment_bookings (

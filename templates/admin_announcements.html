@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Announcements</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f5f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar {
+            background-color: #1f3c88;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #1f3c88;
+        }
+
+        .announcement {
+            border-left: 5px solid #ffc107;
+            content: "";
+            padding: 15px;
+            margin-bottom: 20px;
+            background: #fff3cd;
+            border-radius: 6px;
+        }
+
+        .announcement h4 {
+            margin: 0;
+        }
+
+        .announcement small {
+            color: gray;
+        }
+
+        .btn {
+            padding: 8px 14px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            color: white;
+            background-color: #dc3545;
+        }
+
+        .btn-add {
+            background-color: #28a745;
+            border: none;
+            padding: 10px 15px;
+            color: white;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="navbar">
+    <h3>📢 Announcements</h3>
+    <a href="{{ url_for('dashboard') }}" style="color:white;">Back</a>
+</div>
+
+<div class="container">
+
+    <!-- ADMIN CREATE FORM -->
+    {% if session.get('role') == 'admin' %}
+    <h2>Create Announcement</h2>
+    <form method="POST">
+        <input type="text" name="title" placeholder="Title" required>
+        <textarea name="message" rows="4" placeholder="Message" required></textarea>
+        <button class="btn-add">Post Announcement</button>
+    </form>
+    <hr>
+    {% endif %}
+
+    <!-- ANNOUNCEMENT LIST -->
+    <h2>All Announcements</h2>
+
+    {% if announcements %}
+        {% for a in announcements %}
+        <div class="announcement">
+            <h4>{{ a[1] }}</h4>
+            <p>{{ a[2] }}</p>
+            <small>Posted on {{ a[3] }}</small>
+
+            {% if session.get('role') == 'admin' %}
+                <br><br>
+                <a href="{{ url_for('delete_announcement', aid=a[0]) }}" class="btn">
+                    Delete
+                </a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No announcements yet.</p>
+    {% endif %}
+
+</div>
+
+</body>
+</html>
