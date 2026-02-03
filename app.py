@@ -1,17 +1,34 @@
 from flask import Flask, render_template, redirect, url_for, flash, session, request
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Email
 from flask_bcrypt import Bcrypt
 from werkzeug.utils import secure_filename
 import sqlite3
 import os
 from wtforms import SelectField 
-from datetime import datetime
+from datetime import datetime, timedelta
+from flask_mail import Mail, Message
+import smtplib
+from email.mime.text import MIMEText
+import secrets
+from itsdangerous import URLSafeTimedSerializer
+
 
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'secret123'
+
+serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'yourgmail@gmail.com'
+app.config['MAIL_PASSWORD'] = 'your_app_password'
+app.config['MAIL_DEFAULT_SENDER'] = 'yourgmail@gmail.com'
+
+mail = Mail(app)
 
 bcrypt = Bcrypt(app)
 
@@ -35,7 +52,7 @@ LECTURER_DB = "static/lecturer.db"
 os.makedirs("static", exist_ok=True)
 
 def init_db(db_path, table_sql):
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_path, timeout=10)
     cur = conn.cursor()
     cur.execute(table_sql)
     conn.commit()
@@ -137,34 +154,53 @@ CREATE TABLE IF NOT EXISTS announcements (
 )
 """)
 
+# Add reset_token column (only runs once)
+try:
+    init_db(STUDENT_DB, "ALTER TABLE students ADD COLUMN reset_token TEXT")
+except:
+    pass
+
+try:
+    init_db(LECTURER_DB, "ALTER TABLE lecturers ADD COLUMN reset_token TEXT")
+except:
+    pass
+
+try:
+    init_db(ADMIN_DB, "ALTER TABLE admins ADD COLUMN reset_token TEXT")
+except:
+    pass
+
 
 class StudentSignupForm(FlaskForm):
     student_id = StringField('Student ID', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Sign Up')
 
 class StudentLoginForm(FlaskForm):
-    student_id = StringField('Student ID', validators=[DataRequired()])
+    login = StringField('Student ID or Email', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
 
 class AdminSignupForm(FlaskForm):
     admin_id = StringField('Admin ID', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Sign Up')
 
 class AdminLoginForm(FlaskForm):
-    admin_id = StringField('Admin ID', validators=[DataRequired()])
+    login = StringField('Admin ID or Email', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
 
 class LecturerSignupForm(FlaskForm):
     lecturer_id = StringField('Lecturer ID', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Sign Up')
 
 class LecturerLoginForm(FlaskForm):
-    user_id = StringField('Lecturer ID', validators=[DataRequired()])
+    login = StringField('Lecturer ID or Email', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
 
@@ -185,6 +221,7 @@ class EventForm(FlaskForm):
 
 def query_db(db, query, args=(), one=False):
     conn = sqlite3.connect(db)
+    conn.row_factory = sqlite3.Row   # 🔥 THIS LINE CHANGES EVERYTHING
     cur = conn.cursor()
     cur.execute(query, args)
     conn.commit()
@@ -192,7 +229,18 @@ def query_db(db, query, args=(), one=False):
     conn.close()
     return result[0] if one and result else result
 
+def send_email(to_email, subject, body):
+    EMAIL_ADDRESS = "yourgmail@gmail.com"
+    EMAIL_PASSWORD = "YOUR_GMAIL_APP_PASSWORD"
 
+    msg = MIMEText(body)
+    msg["Subject"] = subject
+    msg["From"] = EMAIL_ADDRESS
+    msg["To"] = to_email
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+        server.sendmail(EMAIL_ADDRESS, to_email, msg.as_string())
 
 @app.route('/')
 def index():
@@ -302,6 +350,85 @@ def reset_password(user_type, user_id):
     # TEMP: show password (later replace with email)
     flash(f"Temporary password for {user_id}: {temp_password}", "warning")
     return redirect(url_for('manage_users'))
+
+from itsdangerous import URLSafeTimedSerializer
+
+app.config['SECRET_KEY'] = 'secret123'
+
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form.get('email')
+
+        # Check STUDENT
+        user = query_db(STUDENT_DB, "SELECT id FROM students WHERE email = ?", (email,), one=True)
+        role = 'student'
+
+        # Check LECTURER
+        if not user:
+            user = query_db(LECTURER_DB, "SELECT id FROM lecturers WHERE email = ?", (email,), one=True)
+            role = 'lecturer'
+
+        # Check ADMIN
+        if not user:
+            user = query_db(ADMIN_DB, "SELECT id FROM admins WHERE email = ?", (email,), one=True)
+            role = 'admin'
+
+        if user:
+            token = serializer.dumps({'id': user[0], 'role': role}, salt='reset-password')
+            reset_link = url_for('reset_password_token', token=token, _external=True)
+
+            # For now we SHOW link instead of sending email
+            flash(f"Reset link (copy this): {reset_link}", "info")
+        else:
+            flash("Email not found!", "danger")
+
+    return render_template('forgot_password.html')
+
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password_token(token):
+    try:
+        data = serializer.loads(token, salt='reset-password', max_age=3600)
+    except:
+        flash("Invalid or expired link", "danger")
+        return redirect(url_for('forgot_password'))
+
+    if request.method == 'POST':
+        email = request.form.get("email")
+        password = request.form.get('password')
+        confirm = request.form.get('confirm')
+
+        # 🔴 DEBUG (optional — you can remove later)
+        print("Password:", password)
+        print("Confirm :", confirm)
+
+        if not password or not confirm:
+            flash("Please fill in both fields", "danger")
+            return render_template('reset_password.html')
+
+        if password != confirm:
+            flash("Passwords do not match", "danger")
+            return render_template('reset_password.html')
+
+        hashed_pw = bcrypt.generate_password_hash(password).decode('utf-8')
+
+        if data['role'] == 'student':
+            query_db(STUDENT_DB,
+                    "UPDATE students SET password = ? WHERE email = ?",
+                    (hashed_pw, email))
+        elif data['role'] == 'lecturer':
+            query_db(LECTURER_DB,
+                    "UPDATE lecturer SET password = ? WHERE email = ?",
+                    (hashed_pw, email))
+        else:
+            query_db(ADMIN_DB,
+                    "UPDATE admins SET password = ? WHERE email = ?",
+                    (hashed_pw, email))
+
+        flash("Password reset successful. Please login.", "success")
+        return redirect(url_for('index'))
+
+    return render_template('reset_password.html')
 
 @app.route('/schedule-event', methods=['GET', 'POST'])
 def schedule_event():
@@ -635,45 +762,122 @@ def student_signup():
             return render_template('studentsignup.html', form=form)
 
         try:
+            # Save to database first
             query_db(
                 STUDENT_DB,
-                "INSERT INTO students (student_id, password) VALUES (?, ?)",
-                (form.student_id.data,
-                 bcrypt.generate_password_hash(form.password.data).decode())
+                "INSERT INTO students (student_id, email, password) VALUES (?, ?, ?)",
+                (
+                    form.student_id.data,
+                    form.email.data,
+                    bcrypt.generate_password_hash(form.password.data).decode()
+                )
             )
-            flash("Student account created successfully!", "success")
+
+            # 📧 SEND WELCOME EMAIL
+            msg = Message(
+                subject="Welcome to Campus Management System 🎓",
+                recipients=[form.email.data]
+            )
+            msg.body = f"""
+Hi {form.student_id.data},
+
+Your student account has been successfully created.
+
+You can now log in and start booking venues and equipment.
+
+– Campus Management System
+"""
+            mail.send(msg)
+
+            flash("Student account created successfully! A confirmation email has been sent.", "success")
             return redirect(url_for('student_login'))
+
         except sqlite3.IntegrityError:
-            flash("Student ID already exists", "danger")
+            flash("Student ID or Email already exists", "danger")
 
     return render_template('studentsignup.html', form=form)
+
 
 @app.route('/student/login', methods=['GET', 'POST'])
 def student_login():
     form = StudentLoginForm()
 
     if form.validate_on_submit():
-        user = query_db(
-            STUDENT_DB,
-            "SELECT * FROM students WHERE student_id = ? AND status = 'active'",
-            (form.student_id.data,),
-            one=True
-        )
+        login_input = form.login.data  # ID or Email
 
-        if user and bcrypt.check_password_hash(user[2], form.password.data):
-            session['role'] = 'student'
-            session['user_id'] = user[1]
-            return redirect(url_for('dashboard'))
-
+        # Check if user typed email
+        if "@" in login_input:
+            user = query_db(
+                STUDENT_DB,
+                "SELECT * FROM students WHERE email = ? AND status = 'active'",
+                (login_input,),
+                one=True
+            )
         else:
-            flash("Invalid credentials or account inactive", "danger")
+            user = query_db(
+                STUDENT_DB,
+                "SELECT * FROM students WHERE student_id = ? AND status = 'active'",
+                (login_input,),
+                one=True
+            )
 
+        if user and bcrypt.check_password_hash(user["password"], form.password.data):
+            session['role'] = 'student'
+            session['user_id'] = user["student_id"]
+            return redirect(url_for('dashboard'))
 
         flash("Invalid credentials or account inactive", "danger")
 
-
     return render_template('student_login.html', form=form)
 
+@app.route('/student/forgot-password', methods=['GET', 'POST'])
+def student_forgot_password():
+    if request.method == 'POST':
+        email = request.form.get('email')
+
+        user = query_db(
+            STUDENT_DB,
+            "SELECT * FROM students WHERE email = ?",
+            (email,),
+            one=True
+        )
+
+        if user:
+            token = secrets.token_urlsafe(16)
+
+            query_db(
+                STUDENT_DB,
+                "UPDATE students SET reset_token = ? WHERE email = ?",
+                (token, email)
+            )
+
+            flash(f"Password reset link: http://127.0.0.1:5000/student/reset/{token}", "info")
+        else:
+            flash("Email not found", "danger")
+
+    return render_template('forgot_password.html', role="student")
+
+@app.route('/student/reset/<token>', methods=['GET', 'POST'])
+def student_reset_password(token):
+    if request.method == 'POST':
+        new_password = request.form.get('password')
+
+        if len(new_password) < 8:
+            flash("Password must be at least 8 characters", "danger")
+            return render_template('reset_password.html')
+
+        hashed = bcrypt.generate_password_hash(new_password).decode()
+
+        query_db(
+            STUDENT_DB,
+            "UPDATE students SET password = ?, reset_token = NULL WHERE reset_token = ?",
+            (hashed, token)
+        )
+
+        flash("Password reset successful. Please login.", "success")
+        return redirect(url_for('student_login'))
+
+    return render_template('reset_password.html')
 
 @app.route('/admin/signup', methods=['GET', 'POST'])
 def admin_signup():
@@ -684,16 +888,43 @@ def admin_signup():
             return render_template('admin_signup.html', form=form)
 
         try:
+            # Save admin to database
             query_db(
                 ADMIN_DB,
-                "INSERT INTO admins (admin_id, password) VALUES (?, ?)",
-                (form.admin_id.data,
-                 bcrypt.generate_password_hash(form.password.data).decode())
+                "INSERT INTO admins (admin_id, email, password) VALUES (?, ?, ?)",
+                (
+                    form.admin_id.data,
+                    form.email.data,
+                    bcrypt.generate_password_hash(form.password.data).decode()
+                )
             )
-            flash("Admin account created successfully!", "success")
+
+            # 📧 SEND WELCOME EMAIL
+            msg = Message(
+                subject="Welcome Admin – Campus Management System 🛠️",
+                recipients=[form.email.data]
+            )
+            msg.body = f"""
+Hello {form.admin_id.data},
+
+Your administrator account has been successfully created.
+
+You now have access to:
+• User management
+• Venue controls
+• Reports and announcements
+
+Login and start managing the campus system.
+
+– Campus Management System
+"""
+            mail.send(msg)
+
+            flash("Admin account created successfully! A confirmation email has been sent.", "success")
             return redirect(url_for('admin_login'))
+
         except sqlite3.IntegrityError:
-            flash("Admin ID already exists", "danger")
+            flash("Admin ID or Email already exists", "danger")
 
     return render_template('admin_signup.html', form=form)
 
@@ -701,33 +932,32 @@ def admin_signup():
 def admin_login():
     form = AdminLoginForm()
 
-
-
     if form.validate_on_submit():
-        admin = query_db(
-            ADMIN_DB,
-            "SELECT * FROM admins WHERE admin_id = ?",
-            (form.admin_id.data,),
-            one=True
-        )
+        login_input = form.login.data  # ID or Email
 
+        if "@" in login_input:
+            admin = query_db(
+                ADMIN_DB,
+                "SELECT * FROM admins WHERE email = ?",
+                (login_input,),
+                one=True
+            )
+        else:
+            admin = query_db(
+                ADMIN_DB,
+                "SELECT * FROM admins WHERE admin_id = ?",
+                (login_input,),
+                one=True
+            )
 
-
-        if admin and bcrypt.check_password_hash(admin[2], form.password.data):
-            session['role'] = 'admin'          # ✅ REQUIRED
-            session['user_id'] = admin[1]      # ✅ REQUIRED
+        if admin and bcrypt.check_password_hash(admin["password"], form.password.data):
+            session['role'] = 'admin'
+            session['user_id'] = admin["admin_id"]
             return redirect(url_for('dashboard'))
 
-
-        if admin and bcrypt.check_password_hash(admin[2], form.password.data):
-            return redirect(url_for('dashboard'))
-
-
-
-        flash("Invalid Admin ID or Password", "danger")
+        flash("Invalid Admin ID/Email or Password", "danger")
 
     return render_template('admin_login.html', form=form)
-
 
 @app.route('/admin/announcements', methods=['GET', 'POST'])
 def admin_announcements():
@@ -783,16 +1013,38 @@ def lecturer_signup():
             return render_template('lecturer_signup.html', form=form)
 
         try:
+            # Save lecturer to database
             query_db(
                 LECTURER_DB,
-                "INSERT INTO lecturers (lecturer_id, password) VALUES (?, ?)",
-                (form.lecturer_id.data,
-                 bcrypt.generate_password_hash(form.password.data).decode())
+                "INSERT INTO lecturers (lecturer_id, email, password) VALUES (?, ?, ?)",
+                (
+                    form.lecturer_id.data,
+                    form.email.data,
+                    bcrypt.generate_password_hash(form.password.data).decode()
+                )
             )
-            flash("Lecturer account created successfully!", "success")
+
+            # 📧 SEND WELCOME EMAIL
+            msg = Message(
+                subject="Welcome Lecturer – Campus Management System 🎓",
+                recipients=[form.email.data]
+            )
+            msg.body = f"""
+Hi {form.lecturer_id.data},
+
+Your lecturer account has been successfully created.
+
+You can now log in to manage your events and campus activities.
+
+– Campus Management System
+"""
+            mail.send(msg)
+
+            flash("Lecturer account created successfully! A confirmation email has been sent.", "success")
             return redirect(url_for('lecturer_login'))
+
         except sqlite3.IntegrityError:
-            flash("Lecturer ID already exists", "danger")
+            flash("Lecturer ID or Email already exists", "danger")
 
     return render_template('lecturer_signup.html', form=form)
 
@@ -801,19 +1053,26 @@ def lecturer_login():
     form = LecturerLoginForm()
 
     if form.validate_on_submit():
-        lecturer = query_db(
-            LECTURER_DB,
-            """
-            SELECT * FROM lecturers
-            WHERE lecturer_id = ? AND status = 'active'
-            """,
-            (form.user_id.data,),
-            one=True
-        )
+        login_input = form.login.data  # ID or Email
 
-        if lecturer and bcrypt.check_password_hash(lecturer[2], form.password.data):
+        if "@" in login_input:
+            lecturer = query_db(
+                LECTURER_DB,
+                "SELECT * FROM lecturers WHERE email = ?",
+                (login_input,),
+                one=True
+            )
+        else:
+            lecturer = query_db(
+                LECTURER_DB,
+                "SELECT * FROM lecturers WHERE lecturer_id = ?",
+                (login_input,),
+                one=True
+            )
+
+        if lecturer and bcrypt.check_password_hash(lecturer["password"], form.password.data):
             session['role'] = 'lecturer'
-            session['user_id'] = lecturer[1]
+            session['user_id'] = lecturer["lecturer_id"]
             return redirect(url_for('dashboard'))
 
         flash("Invalid credentials or account deactivated", "danger")

@@ -56,13 +56,17 @@
     <form method="POST">
         {{ form.hidden_tag() }}
 
-        <label>Student ID</label>
-        {{ form.student_id() }}
+        <label>ID or Email</label>
+        {{ form.login() }}
 
         <label>Password</label>
         {{ form.password() }}
 
         {{ form.submit() }}
+
+        <p style="text-align:center; margin-top:10px;">
+    <a href="{{ url_for('forgot_password') }}">Forgot Password?</a>
+</p>
     </form>
 
     <form action="{{ url_for('student_signup') }}" method="GET">

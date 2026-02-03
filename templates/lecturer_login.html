@@ -73,13 +73,17 @@
     <form method="POST">
         {{ form.hidden_tag() }}
 
-        <label>Lecturer ID</label>
-        {{ form.user_id() }}
+        <label>ID or Email</label>
+        {{ form.login() }}
 
         <label>Password</label>
         {{ form.password() }}
 
         {{ form.submit() }}
+
+        <p style="text-align:center; margin-top:10px;">
+    <a href="{{ url_for('forgot_password') }}">Forgot Password?</a>
+</p>
     </form>
 
     <div class="divider"></div>
