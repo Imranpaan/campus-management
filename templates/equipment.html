@@ -56,8 +56,10 @@
 <div style="background:#fff3cd; padding:20px; border-radius:8px; margin-bottom:30px;">
     <h2>Admin: Add New Equipment</h2>
     <form method="POST">
+        <input type="hidden" name="add_equipment" value="1">
+
         <label>Equipment Name</label><br>
-        <input type="text" name="name" required><br><br>
+        <input type="text" name="equipment_name" required><br><br>
 
         <label>Total Quantity</label><br>
         <input type="number" name="quantity" min="1" required><br><br>
