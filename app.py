@@ -124,6 +124,7 @@ CREATE TABLE IF NOT EXISTS venue_bookings (
 """)
 
 init_db(ADMIN_DB, """
+<<<<<<< HEAD
 CREATE TABLE IF NOT EXISTS equipment_inventory (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     equipment_name TEXT UNIQUE NOT NULL,
@@ -133,6 +134,8 @@ CREATE TABLE IF NOT EXISTS equipment_inventory (
 """)
 
 init_db(ADMIN_DB, """
+=======
+>>>>>>> a81b507f3e6552bdb7d9cd9cdf23d51fef8d18c5
 CREATE TABLE IF NOT EXISTS equipment_bookings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     equipment_name TEXT NOT NULL,
@@ -640,6 +643,7 @@ def timetable():
         unavailable=unavailable
     )
 
+<<<<<<< HEAD
 @app.route('/admin/equipment', methods=['GET', 'POST'])
 def admin_equipment():
     if session.get('role') != 'admin':
@@ -685,6 +689,8 @@ def admin_equipment():
 
     return render_template('admin_equipment.html', equipment=equipment)
 
+=======
+>>>>>>> a81b507f3e6552bdb7d9cd9cdf23d51fef8d18c5
 @app.route('/admin/reports')
 def admin_reports():
     if session.get('role') != 'admin':
@@ -745,11 +751,16 @@ def admin_reports():
     )
 
 
+<<<<<<< HEAD
 @app.route('/equipment', methods=['GET', 'POST'])
+=======
+@app.route('/equipment')
+>>>>>>> a81b507f3e6552bdb7d9cd9cdf23d51fef8d18c5
 def equipment():
     if 'user_id' not in session:
         flash("Please login first", "danger")
         return redirect(url_for('student_login'))
+<<<<<<< HEAD
 
     role = session.get('role')
 
@@ -795,6 +806,15 @@ def equipment():
         equipment=equipment_list,
         role=role
     )
+=======
+    
+    if session.get('role') == 'lecturer':
+        flash("Access Denied: Lecturers are not permitted to view or book equipment.", "danger")
+        return redirect(url_for('dashboard'))
+    
+    bookings = query_db(ADMIN_DB, "SELECT * FROM equipment_bookings")
+    return render_template('equipment.html', bookings=bookings)
+>>>>>>> a81b507f3e6552bdb7d9cd9cdf23d51fef8d18c5
 
 @app.route('/book-equipment', methods=['POST'])
 def book_equipment():
@@ -809,7 +829,11 @@ def book_equipment():
     user_id = session.get('user_id')
     role = session.get('role')
 
+<<<<<<< HEAD
     # 1️⃣ TIME CLASH CHECK
+=======
+    # clash check ((improved))
+>>>>>>> a81b507f3e6552bdb7d9cd9cdf23d51fef8d18c5
     clash = query_db(ADMIN_DB, """
         SELECT * FROM equipment_bookings 
         WHERE equipment_name = ? 
@@ -821,6 +845,7 @@ def book_equipment():
         flash(f"Sorry, {name} is already booked on {date} during that time!", "danger")
         return redirect(url_for('equipment'))
 
+<<<<<<< HEAD
     # 2️⃣ 🆕 STOCK AVAILABILITY CHECK
     available = query_db(ADMIN_DB, """
         SELECT 
@@ -857,6 +882,12 @@ def book_equipment():
     (name,)
     )
 
+=======
+    query_db(ADMIN_DB, 
+             "INSERT INTO equipment_bookings (equipment_name, booked_by, booking_date, start_time, end_time, user_role) VALUES (?, ?, ?, ?, ?, ?)",
+             (name, user_id, date, start, end, role))
+    
+>>>>>>> a81b507f3e6552bdb7d9cd9cdf23d51fef8d18c5
     flash(f"{name} reserved from {start} to {end}!", "success")
     return redirect(url_for('equipment'))
 
@@ -864,6 +895,7 @@ def book_equipment():
 def return_equipment(booking_id):
     if 'user_id' not in session:
         return redirect(url_for('student_login'))
+<<<<<<< HEAD
 
     # Get equipment name before deleting
     booking = query_db(
@@ -894,6 +926,15 @@ def return_equipment(booking_id):
 
     return redirect(url_for('equipment'))
 
+=======
+    
+    query_db(ADMIN_DB, "DELETE FROM equipment_bookings WHERE id = ?", (booking_id,))
+    
+    flash("Equipment returned/booking cancelled.", "info")
+    return redirect(url_for('equipment'))
+
+
+>>>>>>> a81b507f3e6552bdb7d9cd9cdf23d51fef8d18c5
 @app.route('/student/signup', methods=['GET', 'POST'])
 def student_signup():
     form = StudentSignupForm()
@@ -1249,6 +1290,7 @@ def upload_file():
             datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
     )
+<<<<<<< HEAD
     
     query_db(
     ADMIN_DB,
@@ -1288,6 +1330,8 @@ def upload_file():
             "student"
         )
     )
+=======
+>>>>>>> a81b507f3e6552bdb7d9cd9cdf23d51fef8d18c5
 
     flash("File uploaded successfully!", "success")
     return redirect(url_for("lecturer_files"))

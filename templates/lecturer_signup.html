@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -157,4 +158,165 @@
 </div>
 
 </body>
+=======
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecturer Sign Up | Campus Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            /* Replace with the lecture hall image URL */
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('your-lecturer-bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .glass-container {
+            width: 420px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            color: white;
+        }
+
+        h1 { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            font-weight: 600; 
+            font-size: 1.8rem;
+            letter-spacing: 0.5px;
+            color: #efedff;
+        }
+
+        label { 
+            font-size: 0.8rem; 
+            margin-top: 18px; 
+            display: block; 
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            font-weight: 300;
+        }
+
+        /* Styling the Flask-WTF inputs */
+        input[type="text"], input[type="email"], input[type="password"], .form-control {
+            width: 100%;
+            padding: 14px;
+            margin-top: 8px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.9);
+            color: #2d3436;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            background: #ffffff;
+            border-color: #6f42c1;
+            box-shadow: 0 0 12px rgba(111, 66, 193, 0.3);
+        }
+
+        /* Submit Button - Lecturer Purple */
+        input[type="submit"], .signup-btn {
+            margin-top: 30px;
+            width: 100%;
+            padding: 14px;
+            background: #6f42c1;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input[type="submit"]:hover { 
+            background: #5a32a3; 
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(111, 66, 193, 0.4);
+        }
+
+        .alert { 
+            padding: 12px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            font-size: 0.85rem; 
+            text-align: center;
+        }
+        .alert-danger { background: rgba(220, 53, 69, 0.7); }
+        .alert-success { background: rgba(40, 167, 69, 0.7); }
+
+        .footer-link { 
+            text-align: center; 
+            margin-top: 25px; 
+            border-top: 1px solid rgba(255, 255, 255, 0.1); 
+            padding-top: 20px;
+        }
+        
+        .footer-link p { font-size: 0.85rem; opacity: 0.7; }
+        
+        .footer-link a { 
+            color: #a29bfe; 
+            text-decoration: none; 
+            font-weight: 600; 
+            transition: 0.2s;
+        }
+        
+        .footer-link a:hover { color: #ffffff; }
+    </style>
+</head>
+<body>
+
+<div class="glass-container">
+    <h1>Faculty Registration</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <label>Lecturer ID</label>
+        {{ form.lecturer_id(placeholder="Enter Staff ID") }}
+
+        <label>Work Email</label>
+        {{ form.email(placeholder="faculty@university.edu") }}
+        
+        <label>Password</label>
+        {{ form.password(placeholder="••••••••") }}
+
+        {{ form.submit(value="Sign Up") }}
+    </form>
+
+    <div class="footer-link">
+        <p>Already registered?</p>
+        <a href="{{ url_for('lecturer_login') }}">Go to Login Page</a>
+    </div>
+</div>
+
+</body>
+>>>>>>> a81b507f3e6552bdb7d9cd9cdf23d51fef8d18c5
 </html>
