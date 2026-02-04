@@ -30,17 +30,16 @@
 
 <div class="box">
     <h3>Add New Equipment</h3>
-    <form method="POST">
+
+    <!-- ✅ FIXED FORM -->
+    <form method="POST" action="{{ url_for('admin_equipment') }}">
         <label>Equipment Name</label>
         <input type="text" name="name" required>
 
         <label>Total Quantity</label>
-        <input type="number" name="quantity" required min="1">
+        <input type="number" name="quantity" min="1" required>
 
-        <button type="submit" name="add_equipment" value="1"
-    style="background:#1f3c88; color:white; padding:10px 15px; border:none;">
-    Add Equipment
-</button>
+        <button type="submit">Add Equipment</button>
     </form>
 </div>
 

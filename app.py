@@ -656,10 +656,12 @@ def timetable():
 
 @app.route('/admin/equipment', methods=['GET', 'POST'])
 def admin_equipment():
+    # 🔒 Admin-only access
     if session.get('role') != 'admin':
         flash("Access denied", "danger")
         return redirect(url_for('dashboard'))
 
+    # ➕ Handle Add Equipment
     if request.method == 'POST':
         name = request.form.get('name')
         qty = request.form.get('quantity')
@@ -671,33 +673,61 @@ def admin_equipment():
 
         try:
             qty = int(qty)
+            if qty <= 0:
+                flash("Quantity must be greater than 0", "danger")
+                return redirect(url_for('admin_equipment'))
 
-            query_db(
+            # 🔍 Check if equipment already exists
+            existing = query_db(
                 ADMIN_DB,
-                """
-                INSERT INTO equipment_inventory
-                (equipment_name, total_quantity, available_quantity)
-                VALUES (?, ?, ?)
-                """,
-                (name, qty, qty)
+                "SELECT total_quantity FROM equipment_inventory WHERE equipment_name = ?",
+                (name,),
+                one=True
             )
 
-            flash("Equipment added successfully!", "success")
-
-        except sqlite3.IntegrityError:
-            flash("Equipment already exists!", "danger")
+            if existing:
+                # 🔁 Update existing equipment quantities
+                query_db(
+                    ADMIN_DB,
+                    """
+                    UPDATE equipment_inventory
+                    SET
+                        total_quantity = total_quantity + ?,
+                        available_quantity = available_quantity + ?
+                    WHERE equipment_name = ?
+                    """,
+                    (qty, qty, name)
+                )
+                flash("Equipment quantity updated successfully!", "success")
+            else:
+                # ➕ Insert new equipment
+                query_db(
+                    ADMIN_DB,
+                    """
+                    INSERT INTO equipment_inventory
+                    (equipment_name, total_quantity, available_quantity)
+                    VALUES (?, ?, ?)
+                    """,
+                    (name, qty, qty)
+                )
+                flash("New equipment added successfully!", "success")
 
         except ValueError:
-            flash("Quantity must be a number", "danger")
+            flash("Quantity must be a valid number", "danger")
 
         return redirect(url_for('admin_equipment'))
 
+    # 📋 Load equipment list
     equipment = query_db(
         ADMIN_DB,
         "SELECT * FROM equipment_inventory"
     )
 
-    return render_template('admin_equipment.html', equipment=equipment)
+    return render_template(
+        'admin_equipment.html',
+        equipment=equipment
+    )
+
 
  
 @app.route('/admin/reports')
@@ -762,9 +792,6 @@ def admin_reports():
 
 
 @app.route('/equipment', methods=['GET', 'POST'])
-
-@app.route('/equipment')
- 
 def equipment():
     if 'user_id' not in session:
         flash("Please login first", "danger")
@@ -773,23 +800,6 @@ def equipment():
 
     role = session.get('role')
 
-    # === ADMIN ADD EQUIPMENT ===
-    if role == 'admin' and request.method == 'POST' and 'add_equipment' in request.form:
-        name = request.form.get('name')
-        qty = int(request.form.get('quantity'))
-
-        try:
-            query_db(
-                ADMIN_DB,
-                """
-                INSERT INTO equipment_inventory (name, total_quantity, available_quantity)
-                VALUES (?, ?, ?)
-                """,
-                (name, qty, qty)
-            )
-            flash("Equipment added successfully", "success")
-        except sqlite3.IntegrityError:
-            flash("Equipment already exists", "danger")
 
     # === ADMIN DELETE EQUIPMENT ===
     if role == 'admin' and request.method == 'POST' and 'delete_equipment' in request.form:
