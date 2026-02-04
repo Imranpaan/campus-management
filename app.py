@@ -790,7 +790,6 @@ def admin_reports():
     )
 
 
-
 @app.route('/equipment', methods=['GET', 'POST'])
 def equipment():
     if 'user_id' not in session:
@@ -800,6 +799,50 @@ def equipment():
 
     role = session.get('role')
 
+    # === ADMIN ADD EQUIPMENT ===
+    if role == 'admin' and request.method == 'POST' and 'add_equipment' in request.form:
+        name = request.form.get('equipment_name')
+        qty = request.form.get('quantity')
+
+        if not name or not qty:
+            flash("All fields are required!", "danger")
+            return redirect(url_for('equipment'))
+
+        try:
+            qty = int(qty)
+
+            existing = query_db(
+                ADMIN_DB,
+                "SELECT id FROM equipment_inventory WHERE equipment_name = ?",
+                (name,),
+                one=True
+            )
+
+            if existing:
+                query_db(
+                    ADMIN_DB,
+                    """
+                    UPDATE equipment_inventory
+                    SET total_quantity = total_quantity + ?,
+                        available_quantity = available_quantity + ?
+                    WHERE equipment_name = ?
+                    """,
+                    (qty, qty, name)
+                )
+                flash("Equipment quantity updated successfully!", "success")
+            else:
+                query_db(
+                    ADMIN_DB,
+                    """
+                    INSERT INTO equipment_inventory (equipment_name, total_quantity, available_quantity)
+                    VALUES (?, ?, ?)
+                    """,
+                    (name, qty, qty)
+                )
+                flash("New equipment added successfully!", "success")
+
+        except ValueError:
+            flash("Quantity must be a number", "danger")
 
     # === ADMIN DELETE EQUIPMENT ===
     if role == 'admin' and request.method == 'POST' and 'delete_equipment' in request.form:
@@ -848,11 +891,7 @@ def book_equipment():
     user_id = session.get('user_id')
     role = session.get('role')
 
-
     # 1️⃣ TIME CLASH CHECK
-
-    # clash check ((improved))
-
     clash = query_db(ADMIN_DB, """
         SELECT * FROM equipment_bookings 
         WHERE equipment_name = ? 
@@ -864,23 +903,17 @@ def book_equipment():
         flash(f"Sorry, {name} is already booked on {date} during that time!", "danger")
         return redirect(url_for('equipment'))
 
-
-    # 2️⃣ 🆕 STOCK AVAILABILITY CHECK
-    available = query_db(ADMIN_DB, """
-        SELECT 
-            ei.total_quantity - COUNT(eb.id)
-        FROM equipment_inventory ei
-        LEFT JOIN equipment_bookings eb
-            ON ei.equipment_name = eb.equipment_name
-        WHERE ei.equipment_name = ?
-        GROUP BY ei.equipment_name
+    # 2️⃣ STOCK AVAILABILITY CHECK (USE available_quantity)
+    stock = query_db(ADMIN_DB, """
+        SELECT available_quantity FROM equipment_inventory
+        WHERE equipment_name = ?
     """, (name,), one=True)
 
-    if not available or available[0] <= 0:
+    if not stock or stock[0] <= 0:
         flash(f"Sorry, {name} is out of stock!", "danger")
         return redirect(url_for('equipment'))
 
-    # 3️⃣ INSERT BOOKING (ONLY IF STOCK EXISTS)
+    # 3️⃣ INSERT BOOKING
     query_db(
         ADMIN_DB,
         """
@@ -891,22 +924,17 @@ def book_equipment():
         (name, user_id, date, start, end, role)
     )
 
+    # 4️⃣ REDUCE AVAILABLE QUANTITY
     query_db(
-    ADMIN_DB,
-    """
-    UPDATE equipment_inventory
-    SET available_quantity = available_quantity - 1
-    WHERE equipment_name = ? AND available_quantity > 0
-    """,
-    (name,)
+        ADMIN_DB,
+        """
+        UPDATE equipment_inventory
+        SET available_quantity = available_quantity - 1
+        WHERE equipment_name = ?
+        """,
+        (name,)
     )
 
-
-    query_db(ADMIN_DB, 
-             "INSERT INTO equipment_bookings (equipment_name, booked_by, booking_date, start_time, end_time, user_role) VALUES (?, ?, ?, ?, ?, ?)",
-             (name, user_id, date, start, end, role))
-    
- 
     flash(f"{name} reserved from {start} to {end}!", "success")
     return redirect(url_for('equipment'))
 
