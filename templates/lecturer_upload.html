@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Digital Files</title>
+
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f2f5f9;
+        margin: 0;
+        padding: 0;
+    }
+
+    .navbar {
+        background-color: #1f3c88;
+        color: white;
+        padding: 15px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .navbar h2 {
+        margin: 0;
+        font-size: 20px;
+    }
+
+    .nav-btn {
+        background-color: #ffffff;
+        color: #1f3c88;
+        text-decoration: none;
+        padding: 8px 14px;
+        border-radius: 5px;
+        font-weight: bold;
+    }
+
+    .nav-btn:hover {
+        background-color: #e0e6f5;
+    }
+
+    .container {
+        display: flex;
+        justify-content: center;
+        padding: 50px 20px;
+    }
+
+    .card {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        width: 100%;
+        max-width: 600px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    </style>
+</head>
+
+<body>
+
+<div class="navbar">
+    <h2>Lecturer File Upload</h2>
+    <a href="{{ url_for('dashboard') }}" class="nav-btn">Back to Dashboard</a>
+</div>
+
+<div class="container">
+    <div class="card">
+        <h2 style="text-align:center;">📎 Upload Digital File</h2>
+
+        <form method="POST" enctype="multipart/form-data" style="text-align:center;">
+            <input type="file" name="file" required><br><br>
+            <button type="submit" style="
+                padding:10px 20px;
+                background:#1f3c88;
+                color:white;
+                border:none;
+                border-radius:5px;
+                font-weight:bold;
+            ">
+                Upload File
+            </button>
+        </form>
+
+        <p style="text-align:center; margin-top:15px; color:#555;">
+            Allowed formats: PDF, DOCX, PPTX, JPG, PNG<br>
+            Max file size: 5MB
+        </p>
+    </div>
+</div>
+
+</body>
+</html>

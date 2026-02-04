@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Set Venue Unavailability</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f5f9;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #1f3c88;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 15px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+
+        button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 10px;
+            background-color: #1f3c88;
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #162d63;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Set Venue Unavailability</h2>
+
+    <form method="POST">
+        <label>Venue</label>
+        <select name="location" required>
+            <option>Lecture Hall A</option>
+            <option>Lecture Hall B</option>
+            <option>Computer Lab 1</option>
+            <option>Auditorium</option>
+        </select>
+
+        <label>Date</label>
+        <input type="date" name="date" required>
+
+        <label>Start Time</label>
+        <input type="time" name="start_time" required>
+
+        <label>End Time</label>
+        <input type="time" name="end_time" required>
+
+        <label>Reason</label>
+        <textarea name="reason" placeholder="Maintenance / Special Event"></textarea>
+
+        <button type="submit">Save Unavailability</button>
+    </form>
+</div>
+
+</body>
+</html>

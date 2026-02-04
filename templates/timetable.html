@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Event Timetable</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f5f9;
+            margin: 0;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #1f3c88;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        /* Content */
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #1f3c88;
+            margin-bottom: 25px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background-color: #1f3c88;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+         /* Status badges */
+        .badge {
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-weight: bold;
+            color: white;
+            display: inline-block;
+            font-size: 14px;
+        }
+
+        .badge-pending {
+            background-color: #f0ad4e;
+        }
+
+        .badge-approved {
+            background-color: #28a745;
+        }
+
+        .badge-rejected {
+            background-color: #dc3545;
+        }
+
+        /* Unavailability styling */
+        .unavailable {
+            background-color: #ffe6e6;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<!-- Navbar -->
+<div class="navbar">
+    <h3>Event Timetable</h3>
+    <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+</div>
+
+<!-- Timetable -->
+<div class="container">
+    <h2>Upcoming Campus Events</h2>
+    <table>
+        <tr>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Event</th>
+            <th>Venue</th>
+            <th>Booked By</th>
+            <th>Action</th> </tr>
+
+        {% for event in events %}
+<tr>
+    <td>{{ event[2] }}</td>
+    <td>{{ event[3] }}</td>
+    <td>{{ event[1] }}</td>
+    <td>{{ event[5] }}</td>
+    <td>{{ event[6] }} ({{ event[7] }})</td>
+
+    <td>
+        {% if session.get('role') == 'admin' and event[8] == 'pending' %}
+            <a href="{{ url_for('approve_reject_booking', booking_id=event[0], action='approve') }}" class="btn btn-danger btn-sm"
+               style="color: green; font-weight: bold;">Approve</a>
+            |
+            <a href="{{ url_for('approve_reject_booking', booking_id=event[0], action='reject') }}" class="btn btn-danger btn-sm"
+               style="color: red; font-weight: bold;">Reject</a>
+        {% else %}
+            {% if event[8] == 'pending' %}
+                <span class="badge badge-pending">Pending</span>
+            {% elif event[8] == 'approved' %}
+                <span class="badge badge-approved">Approved</span>
+            {% elif event[8] == 'rejected' %}
+                <span class="badge badge-rejected">Rejected</span>
+            {% else %}
+                {{ event[8] }}
+            {% endif %}
+        {% endif %}
+    </td>
+</tr>
+
+{% else %}
+<tr>
+    <td colspan="6">No events scheduled yet.</td>
+</tr>
+{% endfor %}
+</table>
+
+<!-- ✅ ADDED: Venue Unavailability Section (from HTML 1) -->
+<h2 style="margin-top:40px;">Venue Unavailability</h2>
+<table>
+    <tr>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Venue</th>
+        <th>Reason</th>
+        {% if session.get('role') == 'admin' %}
+            <th>Action</th>
+        {% endif %}
+    </tr>
+
+    {% for u in unavailable %}
+    <tr class="unavailable">
+        <td>{{ u[1] }}</td>
+        <td>{{ u[2] }} - {{ u[3] }}</td>
+        <td>{{ u[0] }}</td>
+        <td>{{ u[4] or 'Unavailable' }}</td>
+
+        {% if session.get('role') == 'admin' %}
+        <td>
+            <a href="{{ url_for('delete_unavailability', uid=u[0], date=u[1], start=u[2]) }}"
+               style="color:red;font-weight:bold;">Remove</a>
+        </td>
+        {% endif %}
+    </tr>
+
+    {% else %}
+    <tr>
+        <td colspan="5">No unavailable slots.</td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+
+</body>
+</html>
+

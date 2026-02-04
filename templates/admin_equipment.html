@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Equipment Management</title>
+    <style>
+        body { font-family: Arial; background:#f4f4f4; padding:30px; }
+        h2 { color:#1f3c88; }
+        .box { background:white; padding:20px; border-radius:6px; margin-bottom:30px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
+        input { padding:8px; margin:5px 0; width:100%; }
+        button { padding:10px; background:#1f3c88; color:white; border:none; cursor:pointer; }
+        table { width:100%; border-collapse: collapse; margin-top:20px; }
+        th, td { padding:10px; border-bottom:1px solid #ddd; text-align:center; }
+        th { background:#1f3c88; color:white; }
+        .flash { padding:10px; margin-bottom:15px; border-radius:5px; }
+        .flash-success { background:#d4edda; color:#155724; }
+        .flash-danger { background:#f8d7da; color:#721c24; }
+    </style>
+</head>
+<body>
+
+<h2>Admin Equipment Management</h2>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="flash flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div class="box">
+    <h3>Add New Equipment</h3>
+    <form method="POST">
+        <label>Equipment Name</label>
+        <input type="text" name="name" required>
+
+        <label>Total Quantity</label>
+        <input type="number" name="quantity" required min="1">
+
+        <button type="submit" name="add_equipment" value="1"
+    style="background:#1f3c88; color:white; padding:10px 15px; border:none;">
+    Add Equipment
+</button>
+    </form>
+</div>
+
+<div class="box">
+    <h3>Current Equipment Inventory</h3>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Total Quantity</th>
+            <th>Available Quantity</th>
+        </tr>
+        {% for item in equipment %}
+        <tr>
+            <td>{{ item[0] }}</td>
+            <td>{{ item[1] }}</td>
+            <td>{{ item[2] }}</td>
+            <td>{{ item[3] }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="4">No equipment added yet.</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+</body>
+</html>
