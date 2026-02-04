@@ -2,64 +2,136 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Lecturer Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecturer Login | Campus Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Poppins', sans-serif;
+            /* Use the faculty lounge background image here */
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('your-lecturer-login-bg.jpg');
+            background-size: cover;
+            background-position: center;
             height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .container {
-            width: 350px;
-            background: white;
-            padding: 25px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+
+        .glass-container {
+            width: 380px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            color: white;
         }
-        h1 {
-            text-align: center;
+
+        h1 { 
+            text-align: center; 
+            margin-bottom: 25px; 
+            font-weight: 600; 
+            font-size: 1.8rem;
+            color: #efedff;
         }
-        label {
-            margin-top: 10px;
-            display: block;
+
+        label { 
+            font-size: 0.8rem; 
+            margin-top: 15px; 
+            display: block; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.9;
         }
-        input {
+
+        input[type="text"], input[type="email"], input[type="password"], .form-control {
             width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            box-sizing: border-box;
+            padding: 12px;
+            margin-top: 8px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            outline: none;
+            transition: 0.3s;
         }
-        button {
-            margin-top: 15px;
+
+        input:focus {
+            background: #fff;
+            box-shadow: 0 0 10px rgba(111, 66, 193, 0.4);
+        }
+
+        /* Primary Login Button */
+        input[type="submit"], .login-btn {
+            margin-top: 25px;
             width: 100%;
-            padding: 10px;
-            background: #007bff;
+            padding: 12px;
+            background: #6f42c1; /* Consistent Purple */
             color: white;
             border: none;
+            border-radius: 10px;
+            font-weight: 600;
             cursor: pointer;
+            transition: 0.3s;
         }
-        .signup-btn {
-            background: #6f42c1;
+
+        input[type="submit"]:hover {
+            background: #5a32a3;
+            transform: translateY(-2px);
         }
-        .alert {
-            margin-bottom: 10px;
-            padding: 8px;
+
+        /* Sign Up Button (Secondary style) */
+        .signup-link-btn {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
             color: white;
+            text-decoration: none;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            transition: 0.3s;
         }
-        .alert-danger { background: #dc3545; }
-        .alert-success { background: #28a745; }
+
+        .signup-link-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
         .divider {
-            margin: 15px 0;
-            border-top: 1px solid #eee;
+            margin: 20px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
         }
+
+        .alert { 
+            padding: 10px; 
+            border-radius: 8px; 
+            margin-bottom: 15px; 
+            font-size: 0.85rem; 
+            text-align: center;
+        }
+        .alert-danger { background: rgba(220, 53, 69, 0.8); }
+        .alert-success { background: rgba(40, 167, 69, 0.8); }
+
+        .extra-links { text-align: center; margin-top: 15px; }
+        .extra-links a { 
+            color: #a29bfe; 
+            text-decoration: none; 
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .extra-links a:hover { color: white; }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="glass-container">
     <h1>Lecturer Login</h1>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -73,39 +145,26 @@
     <form method="POST">
         {{ form.hidden_tag() }}
 
-        <label>ID or Email</label>
-        {{ form.login() }}
+        <label>Staff ID or Email</label>
+        {{ form.login(placeholder="ID or Email") }}
 
         <label>Password</label>
-        {{ form.password() }}
+        {{ form.password(placeholder="••••••••") }}
 
-        {{ form.submit() }}
+        {{ form.submit(class="login-btn") }}
 
-        <p style="text-align:center; margin-top:10px;">
-    <a href="{{ url_for('forgot_password') }}">Forgot Password?</a>
-</p>
+        <div class="extra-links">
+            <a href="{{ url_for('forgot_password') }}">Forgot Password?</a>
+        </div>
     </form>
 
     <div class="divider"></div>
 
-    <!-- SIGN UP BUTTON (FORCED) -->
-    <a href="/lecturer/signup"
-       class="signup-btn"
-       style="display:block;
-              text-align:center;
-              padding:10px;
-              color:white;
-              text-decoration:none;
-              border-radius:4px;">
-        Sign Up
-    </a>
+    <a href="/lecturer/signup" class="signup-link-btn">Create New Account</a>
 
-    <div class="divider"></div>
-
-    <div style="text-align:center;">
-        <a href="{{ url_for('index') }}"
-           style="text-decoration:none; color:#007bff; font-weight:bold;">
-            Back to Home
+    <div class="extra-links" style="margin-top: 20px;">
+        <a href="{{ url_for('index') }}" style="color: white; font-weight: 600;">
+            <i class="fas fa-arrow-left"></i> Back to Home
         </a>
     </div>
 </div>

@@ -24,15 +24,15 @@ serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'yourgmail@gmail.com'
-app.config['MAIL_PASSWORD'] = 'your_app_password'
-app.config['MAIL_DEFAULT_SENDER'] = 'yourgmail@gmail.com'
+app.config['MAIL_USERNAME'] = 'imran11072005@gmail.com'
+app.config['MAIL_PASSWORD'] = 'umdz ajbq bwzq gjmi'
+app.config['MAIL_DEFAULT_SENDER'] = 'imran11072005@gmail.com'
 
 mail = Mail(app)
 
 bcrypt = Bcrypt(app)
 
-# ===== File upload config =====
+# File upload location
 
 UPLOAD_FOLDER = "static/uploads"
 ALLOWED_EXTENSIONS = {"pdf", "docx", "pptx", "jpg", "png"}
@@ -62,8 +62,10 @@ init_db(STUDENT_DB, """
 CREATE TABLE IF NOT EXISTS students (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     student_id TEXT UNIQUE NOT NULL,
+    email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
-    status TEXT DEFAULT 'active'
+    status TEXT DEFAULT 'active',
+    reset_token TEXT
 )
 """)
 
@@ -154,7 +156,7 @@ CREATE TABLE IF NOT EXISTS announcements (
 )
 """)
 
-# Add reset_token column (only runs once)
+# reset token
 try:
     init_db(STUDENT_DB, "ALTER TABLE students ADD COLUMN reset_token TEXT")
 except:
@@ -221,7 +223,7 @@ class EventForm(FlaskForm):
 
 def query_db(db, query, args=(), one=False):
     conn = sqlite3.connect(db)
-    conn.row_factory = sqlite3.Row   # 🔥 THIS LINE CHANGES EVERYTHING
+    conn.row_factory = sqlite3.Row   
     cur = conn.cursor()
     cur.execute(query, args)
     conn.commit()
@@ -258,7 +260,7 @@ def dashboard():
     )
 @app.route('/admin/users')
 def manage_users():
-    # Optional: restrict only admin
+    # only admin can access
     if session.get('role') != 'admin':
         flash("Access denied", "danger")
         return redirect(url_for('dashboard'))
@@ -347,7 +349,7 @@ def reset_password(user_type, user_id):
             (hashed_password, user_id)
         )
 
-    # TEMP: show password (later replace with email)
+    # show pass
     flash(f"Temporary password for {user_id}: {temp_password}", "warning")
     return redirect(url_for('manage_users'))
 
@@ -360,16 +362,16 @@ def forgot_password():
     if request.method == 'POST':
         email = request.form.get('email')
 
-        # Check STUDENT
+        # Check student
         user = query_db(STUDENT_DB, "SELECT id FROM students WHERE email = ?", (email,), one=True)
         role = 'student'
 
-        # Check LECTURER
+        # Check lecturer
         if not user:
             user = query_db(LECTURER_DB, "SELECT id FROM lecturers WHERE email = ?", (email,), one=True)
             role = 'lecturer'
 
-        # Check ADMIN
+        # Check admin
         if not user:
             user = query_db(ADMIN_DB, "SELECT id FROM admins WHERE email = ?", (email,), one=True)
             role = 'admin'
@@ -378,7 +380,7 @@ def forgot_password():
             token = serializer.dumps({'id': user[0], 'role': role}, salt='reset-password')
             reset_link = url_for('reset_password_token', token=token, _external=True)
 
-            # For now we SHOW link instead of sending email
+            # show link instead email
             flash(f"Reset link (copy this): {reset_link}", "info")
         else:
             flash("Email not found!", "danger")
@@ -398,7 +400,7 @@ def reset_password_token(token):
         password = request.form.get('password')
         confirm = request.form.get('confirm')
 
-        # 🔴 DEBUG (optional — you can remove later)
+        # debug)
         print("Password:", password)
         print("Confirm :", confirm)
 
@@ -447,7 +449,7 @@ def schedule_event():
         end_time = form.end_time.data
         location = form.location.data
 
-        # 🔴 VENUE CLASH CHECK
+        # venue check
         clash = query_db(
             ADMIN_DB,
             """
@@ -467,7 +469,7 @@ def schedule_event():
             )
             return render_template('schedule_event.html', form=form)
         
-         # 🔴 UNAVAILABILITY CHECK (maintenance / special events)
+         # unavailability
         unavailable = query_db(
             ADMIN_DB,
             """
@@ -488,7 +490,7 @@ def schedule_event():
             return render_template('schedule_event.html', form=form)
 
 
-       # ✅ NO CLASH → INSERT EVENT
+       # if no clash, proceed
         query_db(
             ADMIN_DB,
             """
@@ -564,9 +566,7 @@ def delete_unavailability():
     flash("Unavailability removed.", "success")
     return redirect(url_for('timetable'))
 
-# ================================
-# ADMIN APPROVE / REJECT BOOKINGS
-# ================================
+# admin approve/reject
 @app.route('/admin/booking/<int:booking_id>/<action>')
 def approve_reject_booking(booking_id, action):
     if session.get('role') != 'admin':
@@ -590,7 +590,7 @@ def approve_reject_booking(booking_id, action):
 
 @app.route('/timetable')
 def timetable():
-    # Existing bookings (KEEP AS IS)
+    # existing booking
     events = query_db(
         ADMIN_DB,
         """
@@ -609,7 +609,7 @@ def timetable():
         """
     )
 
-    # 🔴 ADDITION: venue unavailability (maintenance / special events)
+    # venue if unavailable
     unavailable = query_db(
         ADMIN_DB,
         """
@@ -624,7 +624,7 @@ def timetable():
         """
     )
 
-    # Pass BOTH to the template
+    # both
     return render_template(
         'timetable.html',
         events=events,
@@ -644,7 +644,7 @@ def admin_reports():
         one=True
     )[0]
 
-    # Bookings per venue
+    # bookings per venue
     bookings_by_venue = query_db(
         ADMIN_DB,
         """
@@ -654,7 +654,7 @@ def admin_reports():
         """
     )
 
-    # Bookings by role
+    # bookings by role
     bookings_by_role = query_db(
         ADMIN_DB,
         """
@@ -664,7 +664,7 @@ def admin_reports():
         """
     )
 
-    # Booking status distribution
+    # booking status distribution
     bookings_by_status = query_db(
         ADMIN_DB,
         """
@@ -674,7 +674,7 @@ def admin_reports():
         """
     )
 
-    # Venue unavailability count
+    # venue unavailability count
     total_unavailable = query_db(
         ADMIN_DB,
         "SELECT COUNT(*) FROM venue_unavailability",
@@ -693,17 +693,14 @@ def admin_reports():
 
 @app.route('/equipment')
 def equipment():
-    # 1. Check if user is logged in
     if 'user_id' not in session:
         flash("Please login first", "danger")
         return redirect(url_for('student_login'))
     
-    # 2. BLOCK LECTURERS: If the role is 'lecturer', send them away
     if session.get('role') == 'lecturer':
         flash("Access Denied: Lecturers are not permitted to view or book equipment.", "danger")
         return redirect(url_for('dashboard'))
     
-    # 3. If they are a student or admin, show the page
     bookings = query_db(ADMIN_DB, "SELECT * FROM equipment_bookings")
     return render_template('equipment.html', bookings=bookings)
 
@@ -720,8 +717,7 @@ def book_equipment():
     user_id = session.get('user_id')
     role = session.get('role')
 
-    # IMPROVED CLASH CHECK
-    # This checks if (NewStart < ExistingEnd) AND (NewEnd > ExistingStart)
+    # clash check ((improved))
     clash = query_db(ADMIN_DB, """
         SELECT * FROM equipment_bookings 
         WHERE equipment_name = ? 
@@ -742,11 +738,9 @@ def book_equipment():
 
 @app.route('/return-equipment/<int:booking_id>')
 def return_equipment(booking_id):
-    # Ensure the user is logged in
     if 'user_id' not in session:
         return redirect(url_for('student_login'))
     
-    # Delete the specific booking using its primary key (ID)
     query_db(ADMIN_DB, "DELETE FROM equipment_bookings WHERE id = ?", (booking_id,))
     
     flash("Equipment returned/booking cancelled.", "info")
@@ -762,7 +756,6 @@ def student_signup():
             return render_template('studentsignup.html', form=form)
 
         try:
-            # Save to database first
             query_db(
                 STUDENT_DB,
                 "INSERT INTO students (student_id, email, password) VALUES (?, ?, ?)",
@@ -772,8 +765,7 @@ def student_signup():
                     bcrypt.generate_password_hash(form.password.data).decode()
                 )
             )
-
-            # 📧 SEND WELCOME EMAIL
+            # welcome message
             msg = Message(
                 subject="Welcome to Campus Management System 🎓",
                 recipients=[form.email.data]
@@ -803,9 +795,8 @@ def student_login():
     form = StudentLoginForm()
 
     if form.validate_on_submit():
-        login_input = form.login.data  # ID or Email
+        login_input = form.login.data  
 
-        # Check if user typed email
         if "@" in login_input:
             user = query_db(
                 STUDENT_DB,
@@ -888,7 +879,6 @@ def admin_signup():
             return render_template('admin_signup.html', form=form)
 
         try:
-            # Save admin to database
             query_db(
                 ADMIN_DB,
                 "INSERT INTO admins (admin_id, email, password) VALUES (?, ?, ?)",
@@ -899,7 +889,6 @@ def admin_signup():
                 )
             )
 
-            # 📧 SEND WELCOME EMAIL
             msg = Message(
                 subject="Welcome Admin – Campus Management System 🛠️",
                 recipients=[form.email.data]
@@ -933,7 +922,7 @@ def admin_login():
     form = AdminLoginForm()
 
     if form.validate_on_submit():
-        login_input = form.login.data  # ID or Email
+        login_input = form.login.data  
 
         if "@" in login_input:
             admin = query_db(
@@ -1013,7 +1002,6 @@ def lecturer_signup():
             return render_template('lecturer_signup.html', form=form)
 
         try:
-            # Save lecturer to database
             query_db(
                 LECTURER_DB,
                 "INSERT INTO lecturers (lecturer_id, email, password) VALUES (?, ?, ?)",
@@ -1024,7 +1012,6 @@ def lecturer_signup():
                 )
             )
 
-            # 📧 SEND WELCOME EMAIL
             msg = Message(
                 subject="Welcome Lecturer – Campus Management System 🎓",
                 recipients=[form.email.data]
@@ -1053,7 +1040,7 @@ def lecturer_login():
     form = LecturerLoginForm()
 
     if form.validate_on_submit():
-        login_input = form.login.data  # ID or Email
+        login_input = form.login.data  
 
         if "@" in login_input:
             lecturer = query_db(

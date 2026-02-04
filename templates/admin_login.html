@@ -2,74 +2,141 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal | Secure Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Poppins', sans-serif;
+            /* Replace with the dark office background image */
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('your-admin-bg.jpg');
+            background-size: cover;
+            background-position: center;
             height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .container {
-            width: 350px;
-            background: white;
-            padding: 25px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+
+        .glass-container {
+            width: 380px;
+            background: rgba(30, 30, 30, 0.4); /* Darker glass for Admin */
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            padding: 40px;
+            border-radius: 15px; /* Sharper corners for a formal look */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            color: #ffffff;
         }
-        h1 {
-            text-align: center;
+
+        h1 { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            font-weight: 600; 
+            font-size: 1.6rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #f8f9fa;
         }
-        label {
-            margin-top: 10px;
-            display: block;
+
+        label { 
+            font-size: 0.75rem; 
+            margin-top: 15px; 
+            display: block; 
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #adb5bd;
         }
-        input {
+
+        input[type="text"], input[type="email"], input[type="password"], .form-control {
             width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-        }
-        button {
-            margin-top: 15px;
-            width: 100%;
-            padding: 10px;
-            background: #343a40;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        .alert {
-            margin-bottom: 10px;
-            padding: 8px;
-            color: white;
-        }
-        .alert-danger { background: #dc3545; }
-        .alert-success { background:#09fa41; }
-        .link-box {
-            margin-top: 20px;
-            text-align: center;
-            border-top: 1px solid #eee;
-            padding-top: 15px;
-        }
-        .link-box a {
-            text-decoration: none;
-            font-weight: bold;
-            display: block;
+            padding: 12px;
             margin-top: 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            outline: none;
+            transition: 0.3s;
         }
-        .signup-link {
-            color: #4b0000;
+
+        input:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #ff4757; /* A hint of red for Admin focus */
         }
-        .home-link {
-            color: #007bff;
+
+        /* Admin Submit Button */
+        input[type="submit"], .login-btn {
+            margin-top: 25px;
+            width: 100%;
+            padding: 12px;
+            background: #343a40; /* Dark Slate */
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: 0.3s;
         }
+
+        input[type="submit"]:hover {
+            background: #ffffff;
+            color: #000;
+            transform: translateY(-2px);
+        }
+
+        .alert { 
+            padding: 10px; 
+            border-radius: 4px; 
+            margin-bottom: 15px; 
+            font-size: 0.8rem; 
+            text-align: center;
+        }
+        .alert-danger { background: rgba(220, 53, 69, 0.8); }
+        .alert-success { background: rgba(9, 250, 65, 0.6); }
+
+        .link-box {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+
+        .link-box p { font-size: 0.8rem; color: #adb5bd; margin-bottom: 10px; }
+
+        .link-box a { 
+            text-decoration: none; 
+            font-size: 0.85rem;
+            display: block;
+            margin-bottom: 8px;
+            transition: 0.2s;
+        }
+
+        .signup-link { color: #ff4757; font-weight: 600; }
+        .signup-link:hover { color: #ff6b81; }
+
+        .home-link { color: #adb5bd; }
+        .home-link:hover { color: #fff; }
+
+        .forgot-link {
+            text-align: center;
+            display: block;
+            margin-top: 15px;
+            font-size: 0.8rem;
+            color: #adb5bd;
+            text-decoration: none;
+        }
+        .forgot-link:hover { color: #fff; }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="glass-container">
     <h1>Admin Login</h1>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -83,29 +150,25 @@
     <form method="POST">
         {{ form.hidden_tag() }}
 
-        <label>ID or Email</label>
-        {{ form.login() }}
+        <label>Admin ID or Email</label>
+        {{ form.login(placeholder="Root access ID") }}
 
         <label>Password</label>
-        {{ form.password() }}
+        {{ form.password(placeholder="••••••••") }}
 
-        {{ form.submit() }}
+        {{ form.submit(value="Log In") }}
         
-        <p style="text-align:center; margin-top:10px;">
-    <a href="{{ url_for('forgot_password') }}">Forgot Password?</a>
-</p>
+        <a href="{{ url_for('forgot_password') }}" class="forgot-link">Forgot Credentials?</a>
     </form>
 
-    <!-- ✅ ADMIN SIGNUP LINK ADDED -->
     <div class="link-box">
-        <p>Don't have an admin account?</p>
 
         <a href="{{ url_for('admin_signup') }}" class="signup-link">
             Create Admin Account
         </a>
 
         <a href="{{ url_for('index') }}" class="home-link">
-            Back to Home
+            Return to Main Portal
         </a>
     </div>
 </div>

@@ -2,73 +2,132 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Student Sign Up</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Sign Up | Campus Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Poppins', sans-serif;
+            /* Replace the URL below with the bright campus foyer image */
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('your-signup-image.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .container {
-            width: 350px;
-            background: white;
-            padding: 25px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+
+        .glass-container {
+            width: 420px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            padding: 40px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            color: white;
         }
-        h1 {
-            text-align: center;
-            color: #333;
+
+        h1 { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            font-weight: 600; 
+            font-size: 2rem;
+            letter-spacing: -0.5px;
         }
-        label {
-            margin-top: 10px;
-            display: block;
+
+        label { 
+            font-size: 0.85rem; 
+            margin-top: 18px; 
+            display: block; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.85; 
         }
-        input {
+
+        /* Styling the Flask-WTF inputs */
+        input[type="text"], input[type="email"], input[type="password"], .form-control {
             width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            box-sizing: border-box;
+            padding: 14px;
+            margin-top: 8px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.95);
+            color: #1a1a1a;
+            font-family: inherit;
+            outline: none;
+            transition: 0.3s ease;
         }
-        button {
-            margin-top: 15px;
+
+        input:focus {
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.25);
+            transform: scale(1.01);
+        }
+
+        /* Submit Button - Matched with Login style */
+        input[type="submit"], .signup-btn {
+            margin-top: 30px;
             width: 100%;
-            padding: 10px;
-            background: #007bff; /* Blue for signup */
+            padding: 14px;
+            background: #007bff;
             color: white;
             border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
             cursor: pointer;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .alert {
-            padding: 8px;
-            color: white;
-            margin-bottom: 10px;
-            border-radius: 4px;
+
+        input[type="submit"]:hover { 
+            background: #0069d9; 
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
         }
-        .alert-danger {
-            background: #dc3545;
-        }
-        .alert-success {
-            background: #28a745;
-        }
-        .login-link {
-            margin-top: 15px;
+
+        .alert { 
+            padding: 12px; 
+            border-radius: 10px; 
+            margin-bottom: 20px; 
+            font-size: 0.85rem; 
             text-align: center;
         }
-        .login-link a {
-            text-decoration: none;
-            color: #28a745;
-            font-weight: bold;
+        .alert-danger { background: rgba(220, 53, 69, 0.85); color: white; }
+        .alert-success { background: rgba(40, 167, 69, 0.85); color: white; }
+
+        .login-footer { 
+            text-align: center; 
+            margin-top: 25px; 
+            border-top: 1px solid rgba(255, 255, 255, 0.15); 
+            padding-top: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .login-footer p { opacity: 0.8; margin-bottom: 5px; }
+        
+        .login-footer a { 
+            color: #4dabf7; 
+            text-decoration: none; 
+            font-weight: 600; 
+            transition: 0.2s;
+        }
+        
+        .login-footer a:hover { 
+            color: #ffffff; 
+            text-decoration: underline; 
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Student Sign Up</h1>
+<div class="glass-container">
+    <h1>Create Account</h1>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -82,21 +141,20 @@
         {{ form.hidden_tag() }}
 
         <label>Student ID</label>
-        {{ form.student_id() }}
+        {{ form.student_id(placeholder="e.g. STU12345") }}
 
-        <label>Email</label>
-        {{ form.email() }}
+        <label>Institutional Email</label>
+        {{ form.email(placeholder="name@university.edu") }}
         
-        <label>Password</label>
-        {{ form.password() }}
+        <label>Create Password</label>
+        {{ form.password(placeholder="••••••••") }}
 
-        <!-- Sign Up button placed right under password -->
-        {{ form.submit() }}
+        {{ form.submit(value="Sign Up") }}
     </form>
 
-    <div class="login-link">
-        <p>Already have an account?</p>
-        <a href="{{ url_for('student_login') }}">Login here</a>
+    <div class="login-footer">
+        <p>Already a member?</p>
+        <a href="{{ url_for('student_login') }}">Login to your account</a>
     </div>
 </div>
 
