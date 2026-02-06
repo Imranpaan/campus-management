@@ -964,7 +964,7 @@ def return_equipment(booking_id):
             """
             UPDATE equipment_inventory
             SET available_quantity = available_quantity + 1
-            WHERE name = ?
+            WHERE equipment_name = ?
             """,
             (equipment_name,)
         )
