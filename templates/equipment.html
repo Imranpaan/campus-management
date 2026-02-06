@@ -148,53 +148,6 @@
     </tbody>
 </table>
 
-    <h2>Book New Equipment</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Equipment</th>
-                <th>Date</th>
-                <th>From</th>
-                <th>Until</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-
-            <tr>
-                <form action="{{ url_for('book_equipment') }}" method="POST">
-                    <input type="hidden" name="equipment_name" value="Projector">
-                    <td>Projector</td>
-                    <td><input type="date" name="date" required></td>
-                    <td><input type="time" name="start_time" required></td>
-                    <td><input type="time" name="end_time" required></td>
-                    <td>
-                        <button type="submit" style="background-color:#1f3c88; color:white; border:none; padding:5px 12px; border-radius:4px;">
-                            Book
-                        </button>
-                    </td>
-                </form>
-            </tr>
-
-            <tr>
-                <form action="{{ url_for('book_equipment') }}" method="POST">
-                    <input type="hidden" name="equipment_name" value="Laptop">
-                    <td>Laptop</td>
-                    <td><input type="date" name="date" required></td>
-                    <td><input type="time" name="start_time" required></td>
-                    <td><input type="time" name="end_time" required></td>
-                    <td>
-                        <button type="submit" style="background-color:#1f3c88; color:white; border:none; padding:5px 12px; border-radius:4px;">
-                            Book
-                        </button>
-                    </td>
-                </form>
-            </tr>
-
-        </tbody>
-    </table>
-
-
     <hr style="margin: 40px 0;">
 
     <h2>Current Reservations</h2>
