@@ -82,7 +82,8 @@ CREATE TABLE IF NOT EXISTS lecturers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     lecturer_id TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
-    status TEXT DEFAULT 'active'
+    status TEXT DEFAULT 'active',
+    reset_token TEXT    
 )
 """)
 
@@ -442,7 +443,7 @@ def reset_password_token(token):
                     (hashed_pw, email))
         elif data['role'] == 'lecturer':
             query_db(LECTURER_DB,
-                    "UPDATE lecturer SET password = ? WHERE email = ?",
+                    "UPDATE lecturers SET password = ? WHERE email = ?",
                     (hashed_pw, email))
         else:
             query_db(ADMIN_DB,
@@ -891,24 +892,29 @@ def book_equipment():
     user_id = session.get('user_id')
     role = session.get('role')
 
-    # 1️⃣ STOCK AVAILABILITY CHECK ONLY
-    # We no longer care if someone else is using it at the same time.
-    # We only care if 'available_quantity' is greater than 0.
+    # 1️⃣ TIME CLASH CHECK
+    clash = query_db(ADMIN_DB, """
+        SELECT * FROM equipment_bookings 
+        WHERE equipment_name = ? 
+        AND booking_date = ? 
+        AND (? < end_time AND ? > start_time)
+    """, (name, date, start, end), one=True)
+
+    if clash:
+        flash(f"Sorry, {name} is already booked on {date} during that time!", "danger")
+        return redirect(url_for('equipment'))
+
+    # 2️⃣ STOCK AVAILABILITY CHECK (USE available_quantity)
     stock = query_db(ADMIN_DB, """
         SELECT available_quantity FROM equipment_inventory
         WHERE equipment_name = ?
     """, (name,), one=True)
 
-    if not stock:
-        flash(f"Equipment '{name}' not found.", "danger")
+    if not stock or stock[0] <= 0:
+        flash(f"Sorry, {name} is out of stock!", "danger")
         return redirect(url_for('equipment'))
 
-    if stock[0] <= 0:
-        flash(f"Sorry, all available {name} units are currently booked!", "danger")
-        return redirect(url_for('equipment'))
-
-    # 2️⃣ INSERT BOOKING 
-    # Multiple users can now have bookings at the same time.
+    # 3️⃣ INSERT BOOKING
     query_db(
         ADMIN_DB,
         """
@@ -919,7 +925,7 @@ def book_equipment():
         (name, user_id, date, start, end, role)
     )
 
-    # 3️⃣ REDUCE AVAILABLE QUANTITY
+    # 4️⃣ REDUCE AVAILABLE QUANTITY
     query_db(
         ADMIN_DB,
         """
@@ -930,7 +936,7 @@ def book_equipment():
         (name,)
     )
 
-    flash(f"{name} reserved for {date}. Remaining stock decreased.", "success")
+    flash(f"{name} reserved from {start} to {end}!", "success")
     return redirect(url_for('equipment'))
 
 @app.route('/return-equipment/<int:booking_id>')
