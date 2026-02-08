@@ -2,41 +2,174 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>View Equipment</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipment Management | Campus Hub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f2f5f9; margin: 0; }
-        .navbar { background-color: #1f3c88; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
-        .navbar a { color: white; text-decoration: none; font-weight: bold; }
-        .container { max-width: 950px; margin: 40px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #1f3c88; margin-top: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: center; }
-        th { background-color: #1f3c88; color: white; }
-        .return-btn { background-color: #dc3545; color: white; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; }
+        :root {
+            --primary: #1f3c88;
+            --secondary: #5893ff;
+            --bg: #f8fafc;
+            --text: #1e293b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
 
-        /* ✅ Added from HTML 1 (no function change) */
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary) 0%, #162d63 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar h3 { margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 10px; }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .navbar a:hover { background: rgba(255,255,255,0.2); }
+
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px 60px;
+        }
+
+        /* Flash Messages */
         .flash {
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 5px;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            border-radius: 12px;
             text-align: center;
-            font-weight: bold;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            animation: fadeIn 0.5s ease;
         }
-        .flash-danger {
-            background-color: #f8d7da;
-            color: #721c24;
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .flash-danger { background-color: #fee2e2; color: var(--danger); border: 1px solid #fecaca; }
+        .flash-success { background-color: #dcfce7; color: var(--success); border: 1px solid #bbf7d0; }
+
+        /* Admin Section Card */
+        .admin-card {
+            background: #fffbeb;
+            border: 1px solid #fef3c7;
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 40px;
         }
-        .flash-success {
-            background-color: #d4edda;
-            color: #155724;
+
+        .admin-card h2 { margin-top: 0; color: #92400e; font-size: 1.4rem; display: flex; align-items: center; gap: 10px; }
+        
+        .admin-form {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 200px; }
+        .form-group label { font-size: 0.85rem; font-weight: 700; color: #92400e; }
+        
+        .admin-form input {
+            padding: 10px;
+            border: 1px solid #fde68a;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .add-btn {
+            background-color: var(--primary);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .add-btn:hover { background-color: #162d63; }
+
+        /* General Card & Table Styling */
+        .section-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+
+        .card-header {
+            padding: 20px;
+            background: #f1f5f9;
+            border-bottom: 1px solid var(--border);
+        }
+        .card-header h2 { margin: 0; font-size: 1.2rem; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px 20px; background: #f8fafc; color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        td { padding: 15px 20px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        
+        /* Input styling inside table */
+        table input {
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        /* Buttons */
+        .book-btn { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+        .book-btn:hover { background: var(--secondary); }
+        .delete-btn { background: none; color: var(--danger); border: none; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
+        .delete-btn:hover { text-decoration: underline; }
+        .return-btn { background-color: var(--danger); color: white; border: none; padding: 6px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; font-size: 0.85rem;}
+
+        /* Badges */
+        .qty-badge { padding: 4px 10px; border-radius: 20px; font-weight: 800; font-size: 0.85rem; }
+        .qty-ok { background: #dcfce7; color: var(--success); }
+        .qty-low { background: #fee2e2; color: var(--danger); }
+        .status-reserved { color: var(--success); font-weight: 700; display: flex; align-items: center; gap: 5px; }
+
+        @media (max-width: 768px) {
+            .section-card { overflow-x: auto; }
+            .admin-form { flex-direction: column; align-items: stretch; }
         }
     </style>
 </head>
 <body>
 
 <div class="navbar">
-    <h3>Campus Equipment</h3>
-    <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+    <h3><i class="fas fa-boxes"></i> Campus Equipment</h3>
+    <a href="{{ url_for('dashboard') }}"><i class="fas fa-arrow-left"></i> Dashboard</a>
 </div>
 
 <div class="container">
@@ -45,144 +178,149 @@
       {% if messages %}
         {% for category, message in messages %}
           <div class="flash {{ 'flash-danger' if category == 'danger' else 'flash-success' }}">
+            <i class="fas {{ 'fa-exclamation-circle' if category == 'danger' else 'fa-check-circle' }}"></i>
             {{ message }}
           </div>
         {% endfor %}
       {% endif %}
     {% endwith %}
 
-
     {% if role == 'admin' %}
-<div style="background:#fff3cd; padding:20px; border-radius:8px; margin-bottom:30px;">
-    <h2>Admin: Add New Equipment</h2>
-    <form method="POST">
-        <input type="hidden" name="add_equipment" value="1">
-
-        <label>Equipment Name</label><br>
-        <input type="text" name="equipment_name" required><br><br>
-
-        <label>Total Quantity</label><br>
-        <input type="number" name="quantity" min="1" required><br><br>
-
-        <button type="submit" style="background:#1f3c88; color:white; padding:10px 15px; border:none;">
-            Add Equipment
-        </button>
-    </form>
-</div>
-{% endif %}
-
-    <h2>Available Equipment</h2>
-<table>
-    <tr>
-    <th>Equipment</th>
-    <th>Total Quantity</th>
-    {% if role == 'admin' %}
-        <th>Action</th>
-    {% endif %}
-</tr>
-
-    {% for item in inventory %}
-<tr>
-    <td>{{ item[1] }}</td>
-    <td>{{ item[2] }}</td>
-
-    {% if role == 'admin' %}
-    <td>
-        <form method="POST" style="display:inline;">
-            <input type="hidden" name="equipment_id" value="{{ item[0] }}">
-            <button type="submit" name="delete_equipment" value="1"
-                style="background:#dc3545; color:white; border:none; padding:6px 10px; border-radius:4px;">
-                Delete
-            </button>
+    <div class="admin-card">
+        <h2><i class="fas fa-plus-circle"></i> Inventory Management</h2>
+        <form method="POST" class="admin-form">
+            <input type="hidden" name="add_equipment" value="1">
+            <div class="form-group">
+                <label>Item Name</label>
+                <input type="text" name="equipment_name" placeholder="e.g., Wireless Mic" required>
+            </div>
+            <div class="form-group">
+                <label>Total Stock</label>
+                <input type="number" name="quantity" min="1" placeholder="10" required>
+            </div>
+            <button type="submit" class="add-btn">Update Inventory</button>
         </form>
-    </td>
+    </div>
     {% endif %}
-</tr>
-{% endfor %}
 
-</table>
-
-<hr style="margin: 40px 0;">
-
-    <h2>Book New Equipment</h2>
-<table>
-    <thead>
-        <tr>
-            <th>Equipment</th>
-            <th>Available</th>
-            <th>Date</th>
-            <th>From</th>
-            <th>Until</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for item in equipment %}
-        <tr>
-            <form action="{{ url_for('book_equipment') }}" method="POST">
-                <input type="hidden" name="equipment_name" value="{{ item[0] }}">
-                <td>{{ item[0] }}</td>
-                <td>
-                    {% if item[1] > 0 %}
-                        <span style="color:green; font-weight:bold;">{{ item[1] }}</span>
-                    {% else %}
-                        <span style="color:red; font-weight:bold;">0</span>
+    <div class="section-card">
+        <div class="card-header">
+            <h2><i class="fas fa-clipboard-list"></i> Warehouse Status</h2>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Equipment Type</th>
+                    <th>Total Owned</th>
+                    {% if role == 'admin' %}<th>Management</th>{% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in inventory %}
+                <tr>
+                    <td><strong>{{ item[1] }}</strong></td>
+                    <td>{{ item[2] }} units</td>
+                    {% if role == 'admin' %}
+                    <td>
+                        <form method="POST" style="display:inline;">
+                            <input type="hidden" name="equipment_id" value="{{ item[0] }}">
+                            <button type="submit" name="delete_equipment" value="1" class="delete-btn">
+                                <i class="fas fa-trash"></i> Remove Item
+                            </button>
+                        </form>
+                    </td>
                     {% endif %}
-                </td>
-                <td><input type="date" name="date" required></td>
-                <td><input type="time" name="start_time" required></td>
-                <td><input type="time" name="end_time" required></td>
-                <td>
-                    {% if item[1] > 0 %}
-                    <button type="submit"
-                        style="background-color:#1f3c88; color:white; border:none; padding:5px 12px; border-radius:4px;">
-                        Book
-                    </button>
-                    {% else %}
-                    <span style="color:red;">Out of Stock</span>
-                    {% endif %}
-                </td>
-            </form>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-    <hr style="margin: 40px 0;">
+    <div class="section-card">
+        <div class="card-header">
+            <h2><i class="fas fa-calendar-check"></i> Book New Equipment</h2>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Stock</th>
+                    <th>Booking Date</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in equipment %}
+                <tr>
+                    <form action="{{ url_for('book_equipment') }}" method="POST">
+                        <input type="hidden" name="equipment_name" value="{{ item[0] }}">
+                        <td><strong>{{ item[0] }}</strong></td>
+                        <td>
+                            {% if item[1] > 0 %}
+                                <span class="qty-badge qty-ok">{{ item[1] }} available</span>
+                            {% else %}
+                                <span class="qty-badge qty-low">Out of stock</span>
+                            {% endif %}
+                        </td>
+                        <td><input type="date" name="date" required></td>
+                        <td><input type="time" name="start_time" required></td>
+                        <td><input type="time" name="end_time" required></td>
+                        <td>
+                            {% if item[1] > 0 %}
+                            <button type="submit" class="book-btn">Confirm Booking</button>
+                            {% else %}
+                            <button disabled style="background:#cbd5e1; color:#64748b; border:none; padding:8px 16px; border-radius:8px; cursor:not-allowed;">Unavailable</button>
+                            {% endif %}
+                        </td>
+                    </form>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-    <h2>Current Reservations</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Item</th>
-                <th>Date</th>
-                <th>Time Range</th>
-                <th>Booked By</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for booking in bookings %}
-            <tr>
-                <td>{{ booking[1] }}</td>
-                <td>{{ booking[3] }}</td>
-                <td>{{ booking[4] }} to {{ booking[5] }}</td>
-                <td>{{ booking[2] }} ({{ booking[6] }})</td>
-                <td><span style="color: green;">{{ booking[7] }}</span></td>
-                <td>
-                    <a href="{{ url_for('return_equipment', booking_id=booking[0]) }}">
-                        <button class="return-btn">Return</button>
-                    </a>
-                </td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="6">No items currently reserved.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="section-card">
+        <div class="card-header">
+            <h2><i class="fas fa-history"></i> Current Reservations</h2>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Date</th>
+                    <th>Time Range</th>
+                    <th>Borrower</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr>
+                    <td><strong>{{ booking[1] }}</strong></td>
+                    <td><i class="far fa-calendar-alt"></i> {{ booking[3] }}</td>
+                    <td><i class="far fa-clock"></i> {{ booking[4] }} - {{ booking[5] }}</td>
+                    <td>
+                        <small style="color:#64748b;">ID: {{ booking[2] }}</small><br>
+                        <span style="font-size:0.75rem; font-weight:700; color:var(--secondary)">{{ booking[6]|upper }}</span>
+                    </td>
+                    <td><span class="status-reserved"><i class="fas fa-lock"></i> {{ booking[7] }}</span></td>
+                    <td>
+                        <a href="{{ url_for('return_equipment', booking_id=booking[0]) }}" class="return-btn">
+                            <i class="fas fa-undo"></i> Return
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: #94a3b8; padding: 40px;">No items currently checked out.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
 </div>
 </body>

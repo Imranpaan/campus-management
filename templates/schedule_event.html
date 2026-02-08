@@ -2,110 +2,205 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Schedule Event</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule Event | Campus Hub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f5f9;
-            margin: 0;
+        :root {
+            --primary: #1f3c88;
+            --primary-light: #eff6ff;
+            --secondary: #5893ff;
+            --bg: #f8fafc;
+            --text: #1e293b;
+            --border: #e2e8f0;
+            --danger: #ef4444;
         }
 
-        /* Navbar */
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Navbar matched to Dashboard */
         .navbar {
-            background-color: #1f3c88;
+            background: linear-gradient(135deg, var(--primary) 0%, #162d63 100%);
             color: white;
-            padding: 15px 30px;
+            padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .navbar h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .navbar a {
             color: white;
             text-decoration: none;
-            font-weight: bold;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            transition: background 0.3s;
         }
 
-        /* Form Container */
+        .navbar a:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Form Layout */
         .container {
-            max-width: 550px;
-            margin: 40px auto;
+            max-width: 700px;
+            margin: 50px auto;
             background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .header i {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
         }
 
         h2 {
-            text-align: center;
-            color: #1f3c88;
-            margin-bottom: 25px;
+            margin: 0;
+            color: var(--primary);
+            font-size: 1.8rem;
+        }
+
+        .header p {
+            color: #64748b;
+            margin-top: 5px;
+        }
+
+        /* Form Styling */
+        form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .field-group {
+            display: flex;
+            flex-direction: column;
         }
 
         label {
-            font-weight: bold;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: #475569;
         }
 
         input, select, textarea {
-            width: 100%;
-            padding: 8px;
-            margin: 8px 0 15px;
+            padding: 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+            background-color: #fcfdfe;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 4px rgba(88, 147, 255, 0.1);
+            background-color: white;
         }
 
         textarea {
-            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
         }
 
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #1f3c88;
+        /* Submit Button */
+        .submit-btn {
+            grid-column: span 2;
+            padding: 14px;
+            background: var(--primary);
             color: white;
             border: none;
-            border-radius: 5px;
-            font-weight: bold;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
             cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+            margin-top: 10px;
         }
 
-        button:hover {
-            background-color: #162d63;
+        .submit-btn:hover {
+            background: #162d63;
+            transform: translateY(-2px);
         }
 
-        /* Flash messages (ERROR ONLY) */
+        /* Alerts */
         .alert {
-            padding: 12px;
-            margin-bottom: 15px;
-            border-radius: 4px;
-            font-weight: bold;
-            text-align: center;
+            grid-column: span 2;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .alert-danger {
-            background-color: #dc3545;
-            color: white;
+            background-color: #fee2e2;
+            color: var(--danger);
+            border: 1px solid #fecaca;
+        }
+
+        @media (max-width: 600px) {
+            form { grid-template-columns: 1fr; }
+            .full-width, .submit-btn, .alert { grid-column: span 1; }
+            .container { margin: 20px; padding: 25px; }
         }
     </style>
 </head>
 
 <body>
 
-<!-- Navbar -->
 <div class="navbar">
-    <h3>Schedule Event</h3>
-    <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+    <h3><i class="fas fa-calendar-alt"></i> Schedule Event</h3>
+    <a href="{{ url_for('dashboard') }}"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
 </div>
 
-<!-- Form -->
 <div class="container">
-    <h2>Event Details</h2>
+    <div class="header">
+        <i class="fas fa-calendar-check"></i>
+        <h2>Event Details</h2>
+        <p>Fill in the information below to reserve a campus venue.</p>
+    </div>
 
-    <!-- Flash Messages (exclude success) -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% for category, message in messages %}
         {% if category != 'success' %}
           <div class="alert alert-{{ category }}">
-            {{ message }}
+            <i class="fas fa-exclamation-circle"></i> {{ message }}
           </div>
         {% endif %}
       {% endfor %}
@@ -114,25 +209,39 @@
     <form method="POST" action="{{ url_for('schedule_event') }}">
         {{ form.hidden_tag() }}
 
-        <label>Event Title</label>
-        {{ form.title(placeholder="e.g. Tech Talk, Club Meeting") }}
+        <div class="field-group full-width">
+            <label><i class="fas fa-heading"></i> Event Title</label>
+            {{ form.title(placeholder="e.g. Tech Talk, Club Meeting") }}
+        </div>
 
-        <label>Event Date</label>
-        {{ form.date(type="date") }}
+        <div class="field-group">
+            <label><i class="fas fa-calendar-day"></i> Event Date</label>
+            {{ form.date(type="date") }}
+        </div>
 
-        <label>Start Time</label>
-        {{ form.start_time(type="time") }}
+        <div class="field-group">
+            <label><i class="fas fa-map-marker-alt"></i> Venue / Room</label>
+            {{ form.location() }}
+        </div>
 
-        <label>End Time</label>
-        {{ form.end_time(type="time") }}
+        <div class="field-group">
+            <label><i class="fas fa-hourglass-start"></i> Start Time</label>
+            {{ form.start_time(type="time") }}
+        </div>
 
-        <label>Venue / Room</label>
-        {{ form.location() }}
+        <div class="field-group">
+            <label><i class="fas fa-hourglass-end"></i> End Time</label>
+            {{ form.end_time(type="time") }}
+        </div>
 
-        <label>Description</label>
-        {{ form.description(placeholder="Brief description of the event") }}
+        <div class="field-group full-width">
+            <label><i class="fas fa-align-left"></i> Description</label>
+            {{ form.description(placeholder="Brief description of the event purpose...", rows="4") }}
+        </div>
 
-        {{ form.submit() }}
+        <button type="submit" class="submit-btn">
+            <i class="fas fa-paper-plane"></i> Submit Reservation
+        </button>
     </form>
 </div>
 

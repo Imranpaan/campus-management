@@ -2,189 +2,279 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Event Timetable</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timetable | Campus Hub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f5f9;
-            margin: 0;
+        :root {
+            --primary: #1f3c88;
+            --secondary: #5893ff;
+            --bg: #f8fafc;
+            --text: #1e293b;
+            --border: #e2e8f0;
+            --pending: #f59e0b;
+            --approved: #10b981;
+            --rejected: #ef4444;
+            --unavailable-bg: #fff1f2;
+            --unavailable-text: #991b1b;
         }
 
-        /* Navbar */
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* Navbar matched to Dashboard */
         .navbar {
-            background-color: #1f3c88;
+            background: linear-gradient(135deg, var(--primary) 0%, #162d63 100%);
             color: white;
-            padding: 15px 30px;
+            padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
+        .navbar h3 { margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 10px; }
         .navbar a {
             color: white;
             text-decoration: none;
-            font-weight: bold;
-        }
-
-        /* Content */
-        .container {
-            max-width: 900px;
-            margin: 40px auto;
-            background: white;
-            padding: 30px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.1);
             border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .navbar a:hover { background: rgba(255,255,255,0.2); }
+
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px 60px;
         }
 
-        h2 {
-            text-align: center;
-            color: #1f3c88;
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
             margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .section-header i { font-size: 1.5rem; color: var(--primary); }
+        h2 { margin: 0; color: var(--primary); font-size: 1.6rem; }
+
+        /* Table Card Container */
+        .table-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            margin-bottom: 50px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-            text-align: center;
+            text-align: left;
         }
 
         th {
-            background-color: #1f3c88;
-            color: white;
+            background-color: #f1f5f9;
+            color: #475569;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border);
         }
 
-        tr:hover {
-            background-color: #f1f1f1;
+        td {
+            padding: 18px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.95rem;
         }
 
-         /* Status badges */
-        .badge {
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background-color: #fafbfc; }
+
+        /* Modern Status Badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-pending { background: #fffbeb; color: var(--pending); border: 1px solid #fef3c7; }
+        .badge-approved { background: #ecfdf5; color: var(--approved); border: 1px solid #d1fae5; }
+        .badge-rejected { background: #fef2f2; color: var(--rejected); border: 1px solid #fee2e2; }
+
+        /* Admin Action Buttons */
+        .admin-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            text-decoration: none;
             padding: 6px 12px;
-            border-radius: 12px;
-            font-weight: bold;
-            color: white;
-            display: inline-block;
-            font-size: 14px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            transition: all 0.2s;
         }
 
-        .badge-pending {
-            background-color: #f0ad4e;
-        }
+        .approve-btn { background: var(--approved); color: white; }
+        .approve-btn:hover { background: #059669; transform: translateY(-1px); }
+        .reject-btn { background: var(--rejected); color: white; }
+        .reject-btn:hover { background: #dc2626; transform: translateY(-1px); }
 
-        .badge-approved {
-            background-color: #28a745;
+        /* Unavailability Section */
+        .row-unavailable { background-color: var(--unavailable-bg); }
+        .row-unavailable td { color: var(--unavailable-text); }
+        .reason-tag {
+            font-style: italic;
+            color: #64748b;
         }
-
-        .badge-rejected {
-            background-color: #dc3545;
+        
+        .remove-btn {
+            color: var(--rejected);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.85rem;
         }
+        .remove-btn:hover { text-decoration: underline; }
 
-        /* Unavailability styling */
-        .unavailable {
-            background-color: #ffe6e6;
+        @media (max-width: 768px) {
+            .table-card { overflow-x: auto; }
+            th, td { padding: 12px 15px; }
         }
-
     </style>
 </head>
 
 <body>
 
-<!-- Navbar -->
 <div class="navbar">
-    <h3>Event Timetable</h3>
-    <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+    <h3><i class="fas fa-calendar-alt"></i> Timetable Hub</h3>
+    <a href="{{ url_for('dashboard') }}"><i class="fas fa-arrow-left"></i> Dashboard</a>
 </div>
 
-<!-- Timetable -->
 <div class="container">
-    <h2>Upcoming Campus Events</h2>
-    <table>
-        <tr>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Event</th>
-            <th>Venue</th>
-            <th>Booked By</th>
-            <th>Action</th> </tr>
+    
+    <div class="section-header">
+        <i class="fas fa-university"></i>
+        <h2>Upcoming Campus Events</h2>
+    </div>
 
-        {% for event in events %}
-<tr>
-    <td>{{ event[2] }}</td>
-    <td>{{ event[3] }}</td>
-    <td>{{ event[1] }}</td>
-    <td>{{ event[5] }}</td>
-    <td>{{ event[6] }} ({{ event[7] }})</td>
+    <div class="table-card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Event Details</th>
+                    <th>Venue</th>
+                    <th>Organizer</th>
+                    <th>Status / Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in events %}
+                <tr>
+                    <td><strong>{{ event[2] }}</strong></td>
+                    <td>{{ event[3] }} - {{ event[4] }}</td>
+                    <td><strong>{{ event[1] }}</strong></td>
+                    <td><i class="fas fa-map-marker-alt" style="color:#94a3b8"></i> {{ event[5] }}</td>
+                    <td>
+                        <small style="color: #64748b;">{{ event[6] }}</small><br>
+                        <span style="font-size: 0.75rem; font-weight: 600; color: var(--secondary)">{{ event[7] | upper }}</span>
+                    </td>
+                    <td>
+                        {% if session.get('role') == 'admin' and event[8] == 'pending' %}
+                            <div class="admin-actions">
+                                <a href="{{ url_for('approve_reject_booking', booking_id=event[0], action='approve') }}" class="action-btn approve-btn">Approve</a>
+                                <a href="{{ url_for('approve_reject_booking', booking_id=event[0], action='reject') }}" class="action-btn reject-btn">Reject</a>
+                            </div>
+                        {% else %}
+                            {% if event[8] == 'pending' %}
+                                <span class="status-badge badge-pending"><i class="fas fa-hourglass-half"></i> Pending</span>
+                            {% elif event[8] == 'approved' %}
+                                <span class="status-badge badge-approved"><i class="fas fa-check-circle"></i> Approved</span>
+                            {% elif event[8] == 'rejected' %}
+                                <span class="status-badge badge-rejected"><i class="fas fa-times-circle"></i> Rejected</span>
+                            {% else %}
+                                {{ event[8] }}
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: #94a3b8; padding: 40px;">No events scheduled yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-    <td>
-        {% if session.get('role') == 'admin' and event[8] == 'pending' %}
-            <a href="{{ url_for('approve_reject_booking', booking_id=event[0], action='approve') }}" class="btn btn-danger btn-sm"
-               style="color: green; font-weight: bold;">Approve</a>
-            |
-            <a href="{{ url_for('approve_reject_booking', booking_id=event[0], action='reject') }}" class="btn btn-danger btn-sm"
-               style="color: red; font-weight: bold;">Reject</a>
-        {% else %}
-            {% if event[8] == 'pending' %}
-                <span class="badge badge-pending">Pending</span>
-            {% elif event[8] == 'approved' %}
-                <span class="badge badge-approved">Approved</span>
-            {% elif event[8] == 'rejected' %}
-                <span class="badge badge-rejected">Rejected</span>
-            {% else %}
-                {{ event[8] }}
-            {% endif %}
-        {% endif %}
-    </td>
-</tr>
+    <div class="section-header">
+        <i class="fas fa-tools"></i>
+        <h2>Venue Maintenance & Closures</h2>
+    </div>
 
-{% else %}
-<tr>
-    <td colspan="6">No events scheduled yet.</td>
-</tr>
-{% endfor %}
-</table>
-
-<!-- ✅ ADDED: Venue Unavailability Section (from HTML 1) -->
-<h2 style="margin-top:40px;">Venue Unavailability</h2>
-<table>
-    <tr>
-        <th>Date</th>
-        <th>Time</th>
-        <th>Venue</th>
-        <th>Reason</th>
-        {% if session.get('role') == 'admin' %}
-            <th>Action</th>
-        {% endif %}
-    </tr>
-
-    {% for u in unavailable %}
-    <tr class="unavailable">
-        <td>{{ u[1] }}</td>
-        <td>{{ u[2] }} - {{ u[3] }}</td>
-        <td>{{ u[0] }}</td>
-        <td>{{ u[4] or 'Unavailable' }}</td>
-
-        {% if session.get('role') == 'admin' %}
-        <td>
-            <a href="{{ url_for('delete_unavailability', uid=u[0], date=u[1], start=u[2]) }}"
-               style="color:red;font-weight:bold;">Remove</a>
-        </td>
-        {% endif %}
-    </tr>
-
-    {% else %}
-    <tr>
-        <td colspan="5">No unavailable slots.</td>
-    </tr>
-    {% endfor %}
-</table>
+    <div class="table-card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Time Window</th>
+                    <th>Venue</th>
+                    <th>Reason</th>
+                    {% if session.get('role') == 'admin' %}
+                    <th>Management</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in unavailable %}
+                <tr class="row-unavailable">
+                    <td><strong>{{ u[1] }}</strong></td>
+                    <td>{{ u[2] }} to {{ u[3] }}</td>
+                    <td><i class="fas fa-door-closed"></i> {{ u[0] }}</td>
+                    <td class="reason-tag">{{ u[4] or 'Restricted Access' }}</td>
+                    {% if session.get('role') == 'admin' %}
+                    <td>
+                        <a href="{{ url_for('delete_unavailability', uid=u[0], date=u[1], start=u[2]) }}" class="remove-btn">
+                            <i class="fas fa-trash"></i> Remove
+                        </a>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center; color: #94a3b8; padding: 40px;">All venues are currently available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
 </body>
 </html>
-

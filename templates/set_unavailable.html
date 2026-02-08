@@ -2,65 +2,170 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Set Venue Unavailability</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Availability | Campus Hub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f5f9;
+        :root {
+            --primary: #1f3c88;
+            --secondary: #5893ff;
+            --bg: #f8fafc;
+            --text: #1e293b;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+            --warning: #f59e0b;
         }
 
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        /* Navbar matched to Hub style */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary) 0%, #162d63 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .navbar h3 { margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 10px; }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .navbar a:hover { background: rgba(255,255,255,0.2); }
+
+        /* Form Container */
         .container {
-            max-width: 500px;
+            max-width: 550px;
             margin: 50px auto;
             background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header i {
+            font-size: 2.5rem;
+            color: var(--warning);
+            margin-bottom: 10px;
         }
 
         h2 {
-            text-align: center;
-            color: #1f3c88;
-            margin-bottom: 20px;
+            margin: 0;
+            color: var(--primary);
+            font-size: 1.6rem;
+        }
+
+        .header p {
+            color: #64748b;
+            margin-top: 5px;
+            font-size: 0.95rem;
         }
 
         label {
-            font-weight: bold;
-            display: block;
-            margin-top: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+            color: #475569;
+            font-size: 0.85rem;
+            text-transform: uppercase;
         }
 
         input, select, textarea {
             width: 100%;
-            padding: 8px;
-            margin-top: 5px;
+            padding: 12px;
+            margin-top: 8px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+            background-color: #fcfdfe;
+            box-sizing: border-box;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 4px rgba(88, 147, 255, 0.1);
+            background-color: white;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+            font-family: inherit;
         }
 
         button {
-            margin-top: 20px;
+            margin-top: 30px;
             width: 100%;
-            padding: 10px;
-            background-color: #1f3c88;
+            padding: 14px;
+            background: var(--primary);
             color: white;
             border: none;
-            font-weight: bold;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1.1rem;
             cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         button:hover {
             background-color: #162d63;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(31, 60, 136, 0.2);
+        }
+
+        @media (max-width: 600px) {
+            .container { margin: 20px; padding: 25px; }
         }
     </style>
 </head>
 
 <body>
 
+<div class="navbar">
+    <h3><i class="fas fa-tools"></i> Facility Management</h3>
+    <a href="{{ url_for('dashboard') }}"><i class="fas fa-arrow-left"></i> Dashboard</a>
+</div>
+
 <div class="container">
-    <h2>Set Venue Unavailability</h2>
+    <div class="header">
+        <i class="fas fa-exclamation-triangle"></i>
+        <h2>Restrict Venue Access</h2>
+        <p>Block specific campus venues for maintenance, holidays, or special campus-wide events.</p>
+    </div>
 
     <form method="POST">
-        <label>Venue</label>
+        <label><i class="fas fa-map-marker-alt"></i> Select Venue</label>
         <select name="location" required>
             <option>Lecture Hall A</option>
             <option>Lecture Hall B</option>
@@ -68,19 +173,26 @@
             <option>Auditorium</option>
         </select>
 
-        <label>Date</label>
+        <label><i class="fas fa-calendar-alt"></i> Restricted Date</label>
         <input type="date" name="date" required>
 
-        <label>Start Time</label>
-        <input type="time" name="start_time" required>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+                <label><i class="fas fa-clock"></i> Start Time</label>
+                <input type="time" name="start_time" required>
+            </div>
+            <div>
+                <label><i class="fas fa-hourglass-end"></i> End Time</label>
+                <input type="time" name="end_time" required>
+            </div>
+        </div>
 
-        <label>End Time</label>
-        <input type="time" name="end_time" required>
+        <label><i class="fas fa-comment-alt"></i> Reason for Restriction</label>
+        <textarea name="reason" placeholder="e.g. Server Maintenance, Semester Break, Private Function"></textarea>
 
-        <label>Reason</label>
-        <textarea name="reason" placeholder="Maintenance / Special Event"></textarea>
-
-        <button type="submit">Save Unavailability</button>
+        <button type="submit">
+            <i class="fas fa-save"></i> Save Unavailability
+        </button>
     </form>
 </div>
 

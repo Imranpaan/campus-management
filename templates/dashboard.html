@@ -1,201 +1,309 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Campus Event & Space Management</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Campus Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f5f9;
-            margin: 0;
-            padding: 0;
+        :root {
+            --primary: #1f3c88;
+            --secondary: #5893ff;
+            --accent: #ffc107;
+            --danger: #ef4444;
+            --success: #10b981;
+            --bg: #f8fafc;
+            --text: #1e293b;
         }
 
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* Animated Gradient Navbar */
         .navbar {
-            background-color: #1f3c88;
+            background: linear-gradient(135deg, var(--primary) 0%, #162d63 100%);
             color: white;
-            padding: 15px 30px;
+            padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
         .navbar h2 {
-            margin: 0;
+            font-size: 1.4rem;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .logout-btn {
-            background-color: #dc3545;
-            color: white;
+        /* Button Styling */
+        .nav-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn {
             text-decoration: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .logout-btn:hover {
-            background-color: #c82333;
+        .btn-announcement {
+            background-color: var(--accent);
+            color: #000;
         }
 
-        .content {
-            padding: 40px;
+        .btn-announcement:hover {
+            background-color: #e5ad06;
+            transform: translateY(-2px);
         }
 
-        .welcome {
+        .btn-logout {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .btn-logout:hover {
+            background-color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: white;
+            padding: 60px 20px;
             text-align: center;
+            border-bottom: 1px solid #e2e8f0;
             margin-bottom: 40px;
         }
 
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 25px;
+        .hero h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            color: var(--primary);
         }
 
+        .hero p {
+            color: #64748b;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 10px auto 0;
+        }
+
+        /* Dashboard Grid */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        /* Modern Card Styling */
         .card {
             background: white;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            text-align: center;
+            border-radius: 16px;
+            padding: 30px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
-        .card h3 {
-            margin-bottom: 15px;
-            color: #1f3c88;
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border-color: var(--secondary);
         }
 
-        .card p {
-            color: #555;
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            background: #eff6ff;
+            color: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
             margin-bottom: 20px;
         }
 
-        .card a {
-            display: inline-block;
-            padding: 10px 18px;
-            background-color: #1f3c88;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
+        .card h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.25rem;
         }
 
-        .card a:hover {
-            background-color: #162d63;
+        .card p {
+            color: #64748b;
+            margin-bottom: 25px;
+            flex-grow: 1;
+        }
+
+        .action-link {
+            text-decoration: none;
+            background: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: opacity 0.3s;
+        }
+
+        .action-link:hover {
+            opacity: 0.9;
+        }
+
+        .action-link.secondary {
+            background: #f1f5f9;
+            color: var(--primary);
+            margin-top: 10px;
+        }
+
+        /* Role Badge */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            background: #dcfce7;
+            color: var(--success);
+        }
+
+        .admin-badge { background: #fee2e2; color: var(--danger); }
+        .lecturer-badge { background: #fef9c3; color: #a16207; }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 1.8rem; }
+            .grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 
 <body>
 
-<!-- Navbar -->
 <div class="navbar">
-    <h2>Campus Event Scheduling & Space Management System</h2>
+    <h2><i class="fas fa-university"></i> Campus Hub</h2>
 
-    <div style="display:flex; gap:10px; align-items:center;">
-        <a href="{{ url_for('admin_announcements') }}"
-           style="
-               background-color:#ffc107;
-               color:black;
-               text-decoration:none;
-               padding:8px 15px;
-               border-radius:4px;
-               font-weight:bold;
-           ">
-           📢 Announcements
+    <div class="nav-actions">
+        <a href="{{ url_for('admin_announcements') }}" class="btn btn-announcement">
+            <i class="fas fa-bullhorn"></i> Announcements
         </a>
-
-        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+        <a href="{{ url_for('logout') }}" class="btn btn-logout">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
     </div>
 </div>
 
-<!-- Main Content -->
-<div class="content">
-
-    <div class="welcome">
-        <h1>Welcome!</h1>
-        <p>Manage campus events, book spaces and equipments, and view schedules efficiently.</p>
-    </div>
-
-    <!-- Dashboard Cards -->
-   <div class="dashboard">
-
-    <div class="card">
-        <h3>📅 Schedule Event</h3>
-        <p>Create and manage campus events with ease.</p>
-        <a href="{{ url_for('schedule_event') }}">Create Event</a>
-    </div>
-
-    <div class="card">
-        <h3>🕒 View Timetable</h3>
-        <p>Check upcoming events and space bookings.</p>
-        <a href="{{ url_for('timetable') }}">View Schedule</a>
-    </div>
-
-    <div class="card">
-        <h3>🎧 View Equipment</h3>
-        <p>Check available equipment and make bookings for campus events.</p>
-
-        {% if session.get('role') != 'lecturer' %}
-            <a href="{{ url_for('equipment') }}">View Equipment</a>
+<div class="hero">
+    <div class="container">
+        {% if session.get('role') == 'admin' %}
+            <span class="badge admin-badge">Administrator Access</span>
+        {% elif session.get('role') == 'lecturer' %}
+            <span class="badge lecturer-badge">Lecturer Portal</span>
         {% else %}
-            <p style="color:red; font-weight:bold;">Lecturers are not allowed</p>
+            <span class="badge">Student Portal</span>
         {% endif %}
-    </div>
-
-    <!-- ✅ ADMIN ONLY -->
-    {% if session.get('role') == 'admin' %}
-    <div class="card">
-        <h3>👥 User Management</h3>
-        <p>Manage users, deactivate accounts, and reset passwords.</p>
-        <a href="{{ url_for('manage_users') }}">Manage Users</a>
-    </div>
-
-    <div class="card">
-        <h3>📊 Reports</h3>
-        <p>Analyze space usage and event statistics.</p>
-       <a href="{{ url_for('admin_reports') }}" class="btn btn-primary">
-        View Reports
-       </a>
-
-    </div>
-
-
-    <div class="card">
-        <h3>Venue Availability</h3>
-        <p>Mark venues unavailable for maintenance or special events.</p>
-        <a href="{{ url_for('set_unavailable') }}" class="btn btn-primary">
-        Manage Venue
-    </a>
+        <h1>Welcome back!</h1>
+        <p>Seamlessly manage your campus life, resources, and schedules in one unified platform.</p>
     </div>
 </div>
 
+<div class="container">
+    <div class="grid">
+        
+        <div class="card">
+            <div class="card-icon"><i class="fas fa-calendar-plus"></i></div>
+            <h3>Schedule Event</h3>
+            <p>Easily reserve rooms and create campus events for the semester.</p>
+            <a href="{{ url_for('schedule_event') }}" class="action-link">Create Event</a>
+        </div>
 
-    {% endif %}
+        <div class="card">
+            <div class="card-icon"><i class="fas fa-clock"></i></div>
+            <h3>View Timetable</h3>
+            <p>Access the master schedule for venues and current campus activities.</p>
+            <a href="{{ url_for('timetable') }}" class="action-link">View Schedule</a>
+        </div>
 
-    
-   {% if session.get('role') == 'lecturer' %}
-    <div class="card">
-        <h3>📎 Upload Files</h3>
-        <p>Upload and attach digital materials to classes or events.</p>
+        <div class="card">
+            <div class="card-icon"><i class="fas fa-microchip"></i></div>
+            <h3>Campus Equipment</h3>
+            <p>Reserve projectors, audio systems, and technical gear for your needs.</p>
+            {% if session.get('role') != 'lecturer' %}
+                <a href="{{ url_for('equipment') }}" class="action-link">Book Equipment</a>
+            {% else %}
+                <div style="background: #fff1f2; color: #e11d48; padding: 10px; border-radius: 8px; font-weight: 600; text-align: center;">
+                    <i class="fas fa-lock"></i> Student access only
+                </div>
+            {% endif %}
+        </div>
 
-        <div style="margin-top: 15px;">
-        <a href="{{ url_for('upload_file') }}" class="btn">Upload File</a>
+        {% if session.get('role') == 'lecturer' %}
+        <div class="card" style="border-left: 5px solid var(--secondary);">
+            <div class="card-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+            <h3>Resource Center</h3>
+            <p>Manage and share academic materials and digital files with your classes.</p>
+            <a href="{{ url_for('upload_file') }}" class="action-link">Upload File</a>
+            <a href="{{ url_for('lecturer_files') }}" class="action-link secondary">View My Files</a>
+        </div>
+        {% endif %}
+
+        {% if session.get('role') == 'admin' %}
+        <div class="card" style="border-left: 5px solid var(--danger);">
+            <div class="card-icon"><i class="fas fa-users-cog"></i></div>
+            <h3>User Management</h3>
+            <p>Review user access levels, manage accounts, and handle password resets.</p>
+            <a href="{{ url_for('manage_users') }}" class="action-link">Open Control Panel</a>
+        </div>
+
+        <div class="card" style="border-left: 5px solid var(--danger);">
+            <div class="card-icon"><i class="fas fa-chart-pie"></i></div>
+            <h3>System Reports</h3>
+            <p>Generate analytics on venue usage, equipment demand, and booking trends.</p>
+            <a href="{{ url_for('admin_reports') }}" class="action-link">Generate Reports</a>
+        </div>
+
+        <div class="card" style="border-left: 5px solid var(--danger);">
+            <div class="card-icon"><i class="fas fa-tools"></i></div>
+            <h3>Facility Maintenance</h3>
+            <p>Control venue availability and block spaces for maintenance or holidays.</p>
+            <a href="{{ url_for('set_unavailable') }}" class="action-link">Set Unavailability</a>
+        </div>
+        {% endif %}
+
     </div>
-
-    <div style="margin-top: 10px;">
-        <a href="{{ url_for('lecturer_files') }}" class="btn">View Uploaded Files</a>
-    </div>
-
-    {% endif %}
-
-
 </div>
-
 
 </body>
 </html>
-
-

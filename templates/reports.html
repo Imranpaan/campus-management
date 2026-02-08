@@ -2,141 +2,213 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Reports</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics | Campus Hub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f5f9;
-            margin: 0;
+        :root {
+            --primary: #1f3c88;
+            --secondary: #5893ff;
+            --bg: #f8fafc;
+            --text: #1e293b;
+            --border: #e2e8f0;
+            --white: #ffffff;
         }
 
-        /* Navbar */
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* Navbar matched to Hub style */
         .navbar {
-            background-color: #1f3c88;
+            background: linear-gradient(135deg, var(--primary) 0%, #162d63 100%);
             color: white;
-            padding: 15px 30px;
+            padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
+        .navbar h3 { margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 10px; }
         .navbar a {
             color: white;
             text-decoration: none;
-            font-weight: bold;
-        }
-
-        /* Container */
-        .container {
-            max-width: 900px;
-            margin: 40px auto;
-            background: white;
-            padding: 30px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.1);
             border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+        .navbar a:hover { background: rgba(255,255,255,0.2); }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px 60px;
         }
 
-        h2, h3 {
-            color: #1f3c88;
-            margin-bottom: 20px;
-        }
-
-        h2 {
+        .page-header {
             text-align: center;
+            margin-bottom: 40px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        .page-header h2 { color: var(--primary); font-size: 2rem; margin: 0; }
+
+        /* Metric Cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .metric-card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .metric-card i { font-size: 2rem; color: var(--secondary); margin-bottom: 10px; }
+        .metric-value { font-size: 2.5rem; font-weight: 800; color: var(--primary); display: block; }
+        .metric-label { font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; }
+
+        /* Report Sections */
+        .report-section {
+            background: var(--white);
+            border-radius: 16px;
+            border: 1px solid var(--border);
             margin-bottom: 30px;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
         }
 
-        th, td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-            text-align: center;
+        .report-header {
+            background: #f1f5f9;
+            padding: 15px 25px;
+            border-bottom: 1px solid var(--border);
         }
 
-        th {
-            background-color: #1f3c88;
-            color: white;
-        }
+        .report-header h3 { margin: 0; font-size: 1.1rem; color: var(--primary); display: flex; align-items: center; gap: 10px; }
 
-        .stat {
-            font-size: 20px;
-            font-weight: bold;
-            color: #1f3c88;
-            margin-bottom: 30px;
-            text-align: center;
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px 25px; background: #f8fafc; color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        td { padding: 15px 25px; border-bottom: 1px solid #f1f5f9; font-weight: 500; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background-color: #f8fafc; }
+
+        .count-badge {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: 700;
         }
     </style>
 </head>
 
 <body>
 
-<!-- Navbar -->
 <div class="navbar">
-    <h3>System Reports</h3>
-    <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+    <h3><i class="fas fa-chart-line"></i> Analytics Dashboard</h3>
+    <a href="{{ url_for('dashboard') }}"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
 </div>
 
-<!-- Reports -->
 <div class="container">
-
-    <h2>Usage & Booking Reports</h2>
-
-    <!-- ✅ Stats (from report.html 1) -->
-    <div class="stat">
-        Total Bookings: {{ total_bookings }} <br>
-        Total Venue Unavailability Entries: {{ total_unavailable }}
+    <div class="page-header">
+        <h2>Usage & Booking Insights</h2>
     </div>
 
-    <!-- ✅ Bookings by Venue -->
-    <h3>Bookings by Venue</h3>
-    <table>
-        <tr>
-            <th>Venue</th>
-            <th>Total Bookings</th>
-        </tr>
-        {% for v in bookings_by_venue %}
-        <tr>
-            <td>{{ v[0] }}</td>
-            <td>{{ v[1] }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <i class="fas fa-calendar-check"></i>
+            <span class="metric-value">{{ total_bookings }}</span>
+            <span class="metric-label">Total Bookings</span>
+        </div>
+        <div class="metric-card">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span class="metric-value">{{ total_unavailable }}</span>
+            <span class="metric-label">Venue Restrictions</span>
+        </div>
+    </div>
 
-    <!-- ✅ Bookings by User Role -->
-    <h3>Bookings by User Role</h3>
-    <table>
-        <tr>
-            <th>User Role</th>
-            <th>Total Bookings</th>
-        </tr>
-        {% for r in bookings_by_role %}
-        <tr>
-            <td>{{ r[0] }}</td>
-            <td>{{ r[1] }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+    <div class="report-section">
+        <div class="report-header">
+            <h3><i class="fas fa-map-marked-alt"></i> Popular Venues</h3>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Venue Name</th>
+                    <th>Booking Volume</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in bookings_by_venue %}
+                <tr>
+                    <td><strong>{{ v[0] }}</strong></td>
+                    <td><span class="count-badge">{{ v[1] }} reservations</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-    <!-- ✅ Booking Status Overview -->
-    <h3>Booking Status Overview</h3>
-    <table>
-        <tr>
-            <th>Status</th>
-            <th>Total</th>
-        </tr>
-        {% for s in bookings_by_status %}
-        <tr>
-            <td>{{ s[0] }}</td>
-            <td>{{ s[1] }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+    <div class="report-section">
+        <div class="report-header">
+            <h3><i class="fas fa-users"></i> Activity by Role</h3>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>User Role</th>
+                    <th>Engagement Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in bookings_by_role %}
+                <tr>
+                    <td><strong>{{ r[0]|capitalize }}</strong></td>
+                    <td><span class="count-badge">{{ r[1] }} actions</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
+    <div class="report-section">
+        <div class="report-header">
+            <h3><i class="fas fa-tasks"></i> Request Lifecycle</h3>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Current Status</th>
+                    <th>Total Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in bookings_by_status %}
+                <tr>
+                    <td><strong>{{ s[0]|capitalize }}</strong></td>
+                    <td><span class="count-badge">{{ s[1] }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
 </body>
